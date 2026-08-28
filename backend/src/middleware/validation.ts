@@ -7,11 +7,9 @@ export const validateRequest = (schema: any) => {
       next();
     } catch (error: any) {
       if (error.errors) {
-        const messages = error.errors.map((e: any) => e.message);
         res.status(400).json({
           success: false,
           message: 'Validation error',
-          errors: messages
         });
         return;
       }

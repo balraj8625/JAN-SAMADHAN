@@ -41,6 +41,7 @@ NODE_ENV="development"
 FRONTEND_URL="http://localhost:5173"
 MAX_FILE_SIZE_MB=5
 UPLOAD_DIR="./uploads"
+DEMO_AUTH_ENABLED=false
 ```
 
 ### 4. PostgreSQL Setup
@@ -64,7 +65,7 @@ npm run prisma:generate
 Run database migrations:
 
 ```bash
-npm run prisma:migrate
+npm run prisma:deploy
 ```
 
 Seed the database with demo data:
@@ -249,10 +250,10 @@ All departments and grievance events support:
 This is a **hackathon prototype**:
 
 - ❌ Does NOT connect to real CPGRAMS or government systems
-- ❌ OTP verification is mocked (accepts any 4-6 digit OTP)
+- ❌ OTP verification is a development-only demo mechanism. It is disabled unless `DEMO_AUTH_ENABLED=true` and never enables in production.
 - ❌ AI endpoints return deterministic mock results
 - ❌ Demo users are seeded with password `demo123`
-- ✅ Ready for frontend integration
+- ✅ JWT sessions require a valid password, except when the explicit development-only demo OTP mode is enabled.
 - ✅ Demonstrates complete citizen grievance workflow
 
 ## 🛠️ Scripts Reference

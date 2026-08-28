@@ -10,8 +10,10 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "prisma:validate": "prisma validate"
   },
   "keywords": [
     "grievance",
@@ -19,6 +21,9 @@
     "government",
     "api"
   ],
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "author": "",
   "license": "MIT",
   "dependencies": {

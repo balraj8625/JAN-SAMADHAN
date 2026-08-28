@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  name            String
+  mobile          String   @unique
+  email           String?  @unique
+  passwordHash    String?
+  preferredLanguage String @default("en")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  grievances      Grievance[]
+  feedbacks       Feedback[]
+  appeals         Appeal[]
+
+  @@index([mobile])
+  @@index([email])
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  nameEn    String
+  nameHi    String
+  nameMr    String
+  category  String
+  createdAt DateTime @default(now())
+  grievances Grievance[]
+
+  @@index([category])
+}
+
+model Grievance {
+  id              String   @id @default(uuid())
+  grievanceNumber String   @unique
+  userId          String
+  title           String
+  description     String
+  departmentId    String
+  category        String
+  state           String
+  district        String
+  status          String   @default("SUBMITTED")
+  submittedAt     DateTime @default(now())
+  dueAt           DateTime
+  resolution      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department      Department       @relation(fields: [departmentId], references: [id])
+  events          GrievanceEvent[]
+  attachments     Attachment[]
+  feedback        Feedback?
+  appeal          Appeal?
+
+  @@index([userId])
+  @@index([grievanceNumber])
+  @@index([status])
+  @@index([departmentId])
+}
+
+model GrievanceEvent {
+  id          String   @id @default(uuid())
+  grievanceId String
+  status      String
+  messageEn   String
+  messageHi   String
+  messageMr   String
+  createdAt   DateTime @default(now())
+
+  grievance   Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+
+  @@index([grievanceId])
+  @@index([createdAt])
+}
+
+model Attachment {
+  id          String   @id @default(uuid())
+  grievanceId String
+  fileName    String
+  fileType    String
+  fileUrl     String
+  createdAt   DateTime @default(now())
+
+  grievance   Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+
+  @@index([grievanceId])
+}
+
+model Feedback {
+  id          String   @id @default(uuid())
+  grievanceId String   @unique
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  grievance   Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+
+  @@index([grievanceId])
+}
+
+model Appeal {
+  id          String   @id @default(uuid())
+  grievanceId String   @unique
+  reason      String
+  description String
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  grievance   Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+
+  @@index([grievanceId])
+  @@index([status])
+}

@@ -1,297 +1,46 @@
+import { GrievanceStatus, Prisma } from '@prisma/client';
+import crypto from 'crypto';
 import prisma from '../config/database.js';
-import { calculateDueDate, calculateSLA, shouldEscalate } from './slaService.js';
+import { calculateDueDate, calculateSLA, isClosedForCitizen, shouldEscalate } from './slaService.js';
 
-export interface CreateGrievanceInput {
-  userId: string;
-  title: string;
-  description: string;
-  departmentId: string;
-  category: string;
-  state: string;
-  district: string;
-}
-
-export const generateGrievanceNumber = (): string => {
-  const year = new Date().getFullYear();
-  const randomNum = Math.floor(10000 + Math.random() * 90000);
-  return `GRV${year}${randomNum}`;
-};
+export interface CreateGrievanceInput { userId: string; title: string; description: string; departmentId: string; category: string; state: string; district: string; }
+class NotFoundError extends Error { }
+class ConflictError extends Error { }
+class ValidationError extends Error { }
+export { NotFoundError, ConflictError, ValidationError };
+const include = { department: true, events: { orderBy: { createdAt: 'asc' as const } }, attachments: true, feedback: true, appeal: true };
+type FullGrievance = Prisma.GrievanceGetPayload<{ include: typeof include }>;
+const number = () => `GRV${new Date().getFullYear()}${crypto.randomInt(100000, 1000000)}`;
 
 export const createGrievance = async (data: CreateGrievanceInput) => {
-  const grievanceNumber = generateGrievanceNumber();
-  const submittedAt = new Date();
-  const dueAt = calculateDueDate(submittedAt);
-
-  const grievance = await prisma.grievance.create({
-    data: {
-      grievanceNumber,
-      userId: data.userId,
-      title: data.title,
-      description: data.description,
-      departmentId: data.departmentId,
-      category: data.category,
-      state: data.state,
-      district: data.district,
-      status: 'SUBMITTED',
-      submittedAt,
-      dueAt,
-      events: {
-        create: {
-          status: 'SUBMITTED',
-          messageEn: 'Grievance submitted successfully',
-          messageHi: 'शिकायत सफलतापूर्वक जमा की गई',
-          messageMr: 'तक्रार यशस्वीरित्या सबमिट केली'
-        }
-      }
-    },
-    include: {
-      department: true,
-      events: true
-    }
-  });
-
-  return transformGrievance(grievance);
-};
-
-export const getUserGrievances = async (userId: string) => {
-  const grievances = await prisma.grievance.findMany({
-    where: { userId },
-    include: {
-      department: true,
-      events: {
-        orderBy: { createdAt: 'asc' }
-      },
-      feedback: true,
-      appeal: true
-    },
-    orderBy: { createdAt: 'desc' }
-  });
-
-  return grievances.map(transformGrievance);
-};
-
-export const getGrievanceById = async (grievanceId: string, userId: string) => {
-  const grievance = await prisma.grievance.findFirst({
-    where: {
-      id: grievanceId,
-      userId
-    },
-    include: {
-      department: true,
-      events: {
-        orderBy: { createdAt: 'asc' }
-      },
-      attachments: true,
-      feedback: true,
-      appeal: true
-    }
-  });
-
-  if (!grievance) {
-    throw new Error('Grievance not found');
+  const department = await prisma.department.findUnique({ where: { id: data.departmentId }, select: { id: true } });
+  if (!department) throw new ValidationError('Unknown department ID');
+  const submittedAt = new Date(); const dueAt = calculateDueDate(submittedAt);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const grievance = await prisma.grievance.create({ data: { ...data, grievanceNumber: number(), submittedAt, dueAt, status: GrievanceStatus.SUBMITTED, events: { create: { status: 'SUBMITTED', messageEn: 'Grievance submitted successfully', messageHi: 'शिकायत सफलतापूर्वक जमा की गई', messageMr: 'तक्रार यशस्वीरित्या सबमिट केली' } } }, include });
+      return transformGrievance(grievance);
+    } catch (error) { if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error; }
   }
-
-  return transformGrievance(grievance);
+  throw new ConflictError('Could not allocate a unique grievance number; please retry');
 };
-
-export const getTimeline = async (grievanceId: string, userId: string) => {
-  const grievance = await prisma.grievance.findFirst({
-    where: {
-      id: grievanceId,
-      userId
-    },
-    include: {
-      events: {
-        orderBy: { createdAt: 'asc' }
-      }
-    }
-  });
-
-  if (!grievance) {
-    throw new Error('Grievance not found');
-  }
-
-  return grievance.events.map(event => ({
-    id: event.id,
-    status: event.status,
-    message: {
-      en: event.messageEn,
-      hi: event.messageHi,
-      mr: event.messageMr
-    },
-    createdAt: event.createdAt
-  }));
+export const getUserGrievances = async (userId: string) => (await prisma.grievance.findMany({ where: { userId }, include, orderBy: { createdAt: 'desc' } })).map(transformGrievance);
+const owned = async (id: string, userId: string) => { const item = await prisma.grievance.findFirst({ where: { id, userId }, include }); if (!item) throw new NotFoundError('Grievance not found'); return item; };
+export const getGrievanceById = async (id: string, userId: string) => transformGrievance(await owned(id, userId));
+export const getGrievanceByNumber = async (grievanceNumber: string, userId: string) => { const item = await prisma.grievance.findFirst({ where: { grievanceNumber: grievanceNumber.toUpperCase(), userId }, include }); if (!item) throw new NotFoundError('Grievance not found'); return transformGrievance(item); };
+export const getTimeline = async (id: string, userId: string) => (await owned(id, userId)).events.map(event => ({ id: event.id, status: event.status, message: { en: event.messageEn, hi: event.messageHi, mr: event.messageMr }, createdAt: event.createdAt }));
+export const submitFeedback = async (id: string, userId: string, rating: number, comment?: string) => {
+  const grievance = await owned(id, userId);
+  if (!isClosedForCitizen(grievance.status)) throw new ValidationError('Feedback is available only after a grievance is resolved or closed');
+  if (grievance.feedback) throw new ConflictError('Feedback already submitted for this grievance');
+  try { return await prisma.feedback.create({ data: { grievanceId: id, rating, comment } }); } catch (error) { if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new ConflictError('Feedback already submitted for this grievance'); throw error; }
 };
-
-export const submitFeedback = async (grievanceId: string, userId: string, rating: number, comment?: string) => {
-  const grievance = await prisma.grievance.findFirst({
-    where: {
-      id: grievanceId,
-      userId
-    }
-  });
-
-  if (!grievance) {
-    throw new Error('Grievance not found');
-  }
-
-  if (grievance.feedback) {
-    throw new Error('Feedback already submitted for this grievance');
-  }
-
-  const feedback = await prisma.feedback.create({
-    data: {
-      grievanceId,
-      rating,
-      comment
-    }
-  });
-
-  return feedback;
+export const submitAppeal = async (id: string, userId: string, reason: string, description: string) => {
+  const grievance = await owned(id, userId);
+  if (!isClosedForCitizen(grievance.status)) throw new ValidationError('An appeal is available only after a grievance is resolved or closed');
+  if (grievance.appeal) throw new ConflictError('Appeal already submitted for this grievance');
+  try { return await prisma.$transaction(async tx => { const appeal = await tx.appeal.create({ data: { grievanceId: id, reason, description } }); await tx.grievance.update({ where: { id }, data: { status: GrievanceStatus.ESCALATED, events: { create: { status: 'APPEALED', messageEn: 'Appeal submitted for review', messageHi: 'अपील समीक्षा के लिए जमा की गई', messageMr: 'पुनरावलोकनासाठी अपील सादर केली' } } } }); return appeal; }); } catch (error) { if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new ConflictError('Appeal already submitted for this grievance'); throw error; }
 };
-
-export const submitAppeal = async (grievanceId: string, userId: string, reason: string, description: string) => {
-  const grievance = await prisma.grievance.findFirst({
-    where: {
-      id: grievanceId,
-      userId
-    }
-  });
-
-  if (!grievance) {
-    throw new Error('Grievance not found');
-  }
-
-  if (grievance.appeal) {
-    throw new Error('Appeal already submitted for this grievance');
-  }
-
-  // Update grievance status to ESCALATED
-  const [appeal] = await prisma.$transaction([
-    prisma.appeal.create({
-      data: {
-        grievanceId,
-        reason,
-        description,
-        status: 'PENDING'
-      }
-    }),
-    prisma.grievance.update({
-      where: { id: grievanceId },
-      data: { status: 'ESCALATED' }
-    })
-  ]);
-
-  // Add event to timeline
-  await prisma.grievanceEvent.create({
-    data: {
-      grievanceId,
-      status: 'APPEALED',
-      messageEn: 'Grievance escalated - appeal submitted for review',
-      messageHi: 'शिकायत बढ़ाई गई - अपील समीक्षा के लिए जमा की गई',
-      messageMr: 'तक्रार वाढवली - पुनरावलोकनासाठी अपील सादर केली'
-    }
-  });
-
-  return appeal;
-};
-
-export const getAppeal = async (grievanceId: string, userId: string) => {
-  const grievance = await prisma.grievance.findFirst({
-    where: {
-      id: grievanceId,
-      userId
-    },
-    include: {
-      appeal: true
-    }
-  });
-
-  if (!grievance) {
-    throw new Error('Grievance not found');
-  }
-
-  return grievance.appeal;
-};
-
-export const checkEscalationRecommendation = async (grievanceId: string, userId: string) => {
-  const grievance = await prisma.grievance.findFirst({
-    where: {
-      id: grievanceId,
-      userId
-    }
-  });
-
-  if (!grievance) {
-    throw new Error('Grievance not found');
-  }
-
-  const slaResult = calculateSLA(grievance.submittedAt, grievance.dueAt, grievance.status);
-  const shouldEsc = shouldEscalate(slaResult);
-
-  return {
-    recommendEscalation: shouldEsc,
-    reason: shouldEsc 
-      ? (slaResult.isOverdue ? 'Grievance is overdue' : 'Grievance approaching deadline')
-      : 'Grievance is within SLA timeline',
-    daysRemaining: slaResult.daysRemaining,
-    isOverdue: slaResult.isOverdue
-  };
-};
-
-const transformGrievance = (grievance: any) => {
-  const slaResult = calculateSLA(grievance.submittedAt, grievance.dueAt, grievance.status);
-
-  return {
-    id: grievance.id,
-    grievanceNumber: grievance.grievanceNumber,
-    title: grievance.title,
-    description: grievance.description,
-    department: {
-      id: grievance.department.id,
-      name: {
-        en: grievance.department.nameEn,
-        hi: grievance.department.nameHi,
-        mr: grievance.department.nameMr
-      }
-    },
-    category: grievance.category,
-    location: {
-      state: grievance.state,
-      district: grievance.district
-    },
-    status: grievance.status,
-    submittedAt: grievance.submittedAt,
-    dueAt: grievance.dueAt,
-    resolution: grievance.resolution,
-    timeline: grievance.events?.map((e: any) => ({
-      status: e.status,
-      message: {
-        en: e.messageEn,
-        hi: e.messageHi,
-        mr: e.messageMr
-      },
-      createdAt: e.createdAt
-    })) || [],
-    sla: slaResult,
-    feedback: grievance.feedback ? {
-      rating: grievance.feedback.rating,
-      comment: grievance.feedback.comment,
-      submittedAt: grievance.feedback.createdAt
-    } : null,
-    appeal: grievance.appeal ? {
-      appealId: grievance.appeal.id,
-      reason: grievance.appeal.reason,
-      description: grievance.appeal.description,
-      status: grievance.appeal.status,
-      createdAt: grievance.appeal.createdAt
-    } : null,
-    attachments: grievance.attachments?.map((a: any) => ({
-      id: a.id,
-      fileName: a.fileName,
-      fileType: a.fileType,
-      fileUrl: a.fileUrl,
-      createdAt: a.createdAt
-    })) || []
-  };
-};
+export const getAppeal = async (id: string, userId: string) => (await owned(id, userId)).appeal;
+export const checkEscalationRecommendation = async (id: string, userId: string) => { const grievance = await owned(id, userId); const sla = calculateSLA(grievance.submittedAt, grievance.dueAt, grievance.status); const recommendEscalation = shouldEscalate(sla); return { recommendEscalation, reason: recommendEscalation ? (sla.isOverdue ? 'Grievance is overdue' : 'Grievance is approaching its SLA deadline') : 'No escalation recommendation', ...sla }; };
+const transformGrievance = (g: FullGrievance) => ({ id: g.id, grievanceNumber: g.grievanceNumber, title: g.title, description: g.description, department: { id: g.department.id, name: { en: g.department.nameEn, hi: g.department.nameHi, mr: g.department.nameMr } }, category: g.category, location: { state: g.state, district: g.district }, status: g.status, submittedAt: g.submittedAt, dueAt: g.dueAt, resolution: g.resolution, timeline: g.events.map(e => ({ status: e.status, message: { en: e.messageEn, hi: e.messageHi, mr: e.messageMr }, createdAt: e.createdAt })), sla: calculateSLA(g.submittedAt, g.dueAt, g.status), feedback: g.feedback, appeal: g.appeal, attachments: g.attachments.map(a => ({ id: a.id, fileName: a.fileName, fileType: a.fileType, downloadUrl: `/api/grievances/${g.id}/attachments/${a.id}/download`, createdAt: a.createdAt })) });

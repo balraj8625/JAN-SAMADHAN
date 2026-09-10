@@ -69,6 +69,16 @@ export const SuccessPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Attachment Upload Warning Notice if any failed */}
+        {searchParams.get('attachmentWarning') && (
+          <div className="p-3.5 bg-amber-50 border border-amber-300 text-amber-900 text-xs font-semibold rounded-md text-left max-w-lg mx-auto space-y-1">
+            <p className="font-bold">⚠️ Note regarding attachments:</p>
+            <p className="text-amber-800 font-normal">
+              Your grievance was successfully registered, but one or more attachments could not be uploaded ({searchParams.get('attachmentWarning')}). You can present physical copies during site inspection.
+            </p>
+          </div>
+        )}
+
         {/* SMS Notification Confirmation */}
         <div className="p-3.5 bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold rounded-md flex items-center justify-center gap-2 max-w-lg mx-auto">
           <MessageSquare className="w-4 h-4 text-blue-700 flex-shrink-0" />

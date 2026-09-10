@@ -301,7 +301,7 @@ export const GrievanceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
   }, [departments]);
 
-  const submitGrievance = useCallback(async (): Promise<Grievance> => {
+  const submitGrievance = useCallback(async (): Promise<Grievance & { attachmentWarnings?: string[] }> => {
     const titleText =
       draft.description.length > 60
         ? draft.description.substring(0, 60) + '...'
@@ -320,6 +320,7 @@ export const GrievanceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     const created = await grievanceApi.createGrievance(payload);
+    const attachmentWarnings: string[] = [];
 
     // If there are file attachments, upload them to the created grievance
     if (draft.attachments && draft.attachments.length > 0) {
@@ -327,18 +328,24 @@ export const GrievanceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (att.file) {
           try {
             await attachmentApi.uploadAttachment(created.id, att.file);
-          } catch {
-            // Log upload issue without failing whole grievance submission
+          } catch (err: unknown) {
+            const errorText = err instanceof Error ? err.message : 'Upload failed';
+            attachmentWarnings.push(`${att.name}: ${errorText}`);
           }
         }
       }
     }
 
     const adapted = adaptBackendGrievance(created);
+    const result = {
+      ...adapted,
+      ...(attachmentWarnings.length > 0 ? { attachmentWarnings } : {}),
+    };
+
     setRawBackendGrievances((prev) => [created, ...prev]);
     setGrievances((prev) => [adapted, ...prev]);
     resetDraft();
-    return adapted;
+    return result;
   }, [draft, resetDraft]);
 
   const getGrievanceById = useCallback(

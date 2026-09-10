@@ -93,9 +93,11 @@ npm run preview
 ## 🌐 API Client Layer & Authentication
 
 - The API client is located in [`src/api/client.ts`](file:///c:/Users/Asus/Downloads/jan%20samadhan/JAN-SAMADHAN/src/api/client.ts).
-- Every outgoing request automatically attaches the Bearer token if `jan_samadhan_token` is present in `localStorage`.
+- For the current Single Page Application implementation, the JWT token is stored in browser `localStorage` (`jan_samadhan_token`).
+- Outgoing API requests attach the token in the `Authorization: Bearer <token>` header.
 - On application mount, `AuthContext` calls `/api/auth/me` to validate the token and restore the citizen's profile.
 - If a `401 Unauthorized` response is received, the client safely clears invalid session tokens and updates UI state.
+- **Security Note**: In a future hardened production deployment, teams may choose to migrate from `localStorage` to secure `HttpOnly` `SameSite` cookies or another stronger session storage mechanism to further minimize XSS token exposure risks.
 
 ---
 

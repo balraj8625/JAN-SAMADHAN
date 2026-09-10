@@ -71,7 +71,13 @@ export const LodgeGrievancePage: React.FC = () => {
     setErrorMsg('');
     try {
       const newGrievance = await submitGrievance();
-      navigate(`/success?id=${newGrievance.id}`);
+      const warningParam =
+        newGrievance.attachmentWarnings && newGrievance.attachmentWarnings.length > 0
+          ? `&attachmentWarning=${encodeURIComponent(
+              newGrievance.attachmentWarnings.join('; ')
+            )}`
+          : '';
+      navigate(`/success?id=${newGrievance.id}${warningParam}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to submit grievance. Please try again.';
       setErrorMsg(msg);

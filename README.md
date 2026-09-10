@@ -242,6 +242,7 @@ npx tsx scripts/test-e2e.ts
 
 ## 🔒 Security & Governance Considerations
 
+- **Authentication & Token Handling**: In the current Single Page Application (SPA), authenticated sessions use JWTs stored in browser `localStorage` and sent via Bearer headers. For future enterprise hardening, teams can consider transitioning to secure `HttpOnly` cookies.
 - **Strict User Scoping & IDOR Prevention**: Citizens can only query and mutate grievances matching their authenticated user ID.
 - **Production Guardrails**: In `production` mode, `DEMO_AUTH_ENABLED` is hard-disabled, and database error stacks are sanitized to prevent internal schema leakage.
 - **Rate Limiting**: Express rate limiting protects API routes from brute force attacks (100 requests per 15 minutes per IP).

@@ -145,7 +145,7 @@ export interface GrievanceContextType {
   resetDraft: () => void;
   refreshGrievances: () => Promise<void>;
   analyzeProblemAI: (text: string) => Promise<void>;
-  submitGrievance: () => Promise<Grievance>;
+  submitGrievance: () => Promise<Grievance & { attachmentWarnings?: string[] }>;
   getGrievanceById: (id: string) => Grievance | undefined;
   fetchGrievanceByRefOrId: (idOrNumber: string) => Promise<Grievance | null>;
   submitFeedback: (id: string, rating: number, comment?: string) => Promise<void>;

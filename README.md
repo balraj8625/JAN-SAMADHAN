@@ -6,51 +6,35 @@
 
 ## What is JAN-SAMADHAN?
 
-**JAN-SAMADHAN (जन-समाधान)** is a full-stack digital governance platform designed to make it simple for citizens to report public grievances and track their resolution by government departments.
+**JAN-SAMADHAN (जन-समाधान)** is a full-stack digital governance platform that helps citizens submit public grievances to government departments and track their resolution in real time.
 
 ### The Problem It Solves
-Traditional grievance submission systems are often confusing, available in only one language, lack transparent status updates, and have no clear tracking against official resolution timeframes.
+Traditional public grievance systems are often difficult to navigate, available in only one language, lack transparent status tracking, and provide no clear visibility into resolution timeframes.
 
 ### Who Uses It?
-- **Citizens**: To easily lodge complaints (via text or speech), attach evidence, track real-time progress, provide feedback, or file formal appeals.
-- **Department Officials & Administrators**: To view incoming grievances assigned to their department, update investigation status, provide official resolution remarks, and monitor resolution timelines.
+- **Citizens**: To lodge grievances in their preferred language (using text or voice), upload supporting documents, track progress with visual timelines, provide feedback, or file formal appeals.
+- **Department Officials & Administrators**: To view incoming department tickets, record investigation updates, resolve issues, and monitor Service Level Agreement (SLA) deadlines.
 
 ---
 
 ## Main Features
 
-- **Citizen Registration & Login**: Simple authentication using mobile number and password, with session restoration.
-- **Multilingual Interface**: Complete language support for **English**, **Hindi (हिन्दी)**, and **Marathi (मराठी)**.
-- **Voice & AI Assistance**: Hands-free voice speech-to-text input, automated text categorization, AI-assisted grievance drafting, and simplification of bureaucratic responses.
-- **Department Selection**: Standardized catalog of public departments (Water Supply, Electricity, Municipal, Public Works, etc.).
-- **Evidence Attachments**: Secure file upload supporting images and documents (PDF, PNG, JPG) with file-type and size validation.
-- **Tracking & Timelines**: Instant generation of unique reference numbers (e.g. `GRV2026136015`) with step-by-step visual timeline progression.
-- **SLA & Escalation Monitoring**: Standard 21-day Service Level Agreement (SLA) countdown with escalation warnings for overdue grievances.
-- **Feedback & Appeals**: Rating and feedback loop for resolved complaints, plus a formal appeal workflow for unsatisfactory resolutions.
+- **Citizen Registration & Login**: Simple authentication using mobile number and password with persistent sessions.
+- **Multilingual Support**: Full interface translation across **English**, **Hindi (हिन्दी)**, and **Marathi (मराठी)**.
+- **Voice & AI Redressal Assistance**: Hands-free voice speech-to-text input, automatic department suggestion, AI grievance draft generation, and plain-language explanation of official responses.
+- **Department Selection**: Standardized catalog of public departments (Water Supply, Electricity, Municipal Services, Public Works, Healthcare, etc.).
+- **Evidence Attachments**: Secure file uploads supporting `.jpg`, `.jpeg`, `.png`, `.pdf`, `.doc`, and `.docx` formats (up to 5 MB).
+- **Tracking & Timelines**: Automatic generation of unique tracking numbers (e.g. `GRV2026136015`) with step-by-step progress history.
+- **SLA & Escalation Monitoring**: 21-day target resolution SLA with automatic overdue alerts and escalation recommendations.
+- **Feedback & Appeals**: Citizen satisfaction rating upon resolution and formal appeal workflow for unresolved issues.
 
 ---
 
 ## Technology Stack
 
-### Frontend
-- **React 19** & **TypeScript** (Single Page Application)
-- **Vite** (Build tool & development server)
-- **Tailwind CSS** (Styling & layout)
-- **React Router v7** (Client-side routing)
-- **React Context API** (`AuthContext`, `GrievanceContext`, `LanguageContext`)
-- **Lucide React** (Icons) & **Framer Motion** (Transitions)
-
-### Backend
-- **Node.js** & **Express** (REST API in TypeScript)
-- **Prisma ORM** & **PostgreSQL** (Database access and schema modeling)
-- **JWT (jsonwebtoken)** (Stateless API authentication)
-- **Zod** (Request input validation)
-- **Bcrypt** (Password hashing)
-- **Multer** (File upload processing)
-
-### Testing & CI
-- **Automated E2E Integration Suite** (Positive workflows + Negative security tests)
-- **GitHub Actions** (Continuous Integration for linting, typechecking, Prisma schema validation, and builds)
+- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS, React Router v7, React Context API, Lucide Icons, Framer Motion.
+- **Backend**: Node.js, Express, TypeScript, Prisma ORM, PostgreSQL, JWT (`jsonwebtoken`), Zod, Bcrypt, Multer.
+- **Testing & CI**: Automated End-to-End integration test suite, GitHub Actions CI.
 
 ---
 
@@ -60,41 +44,34 @@ Traditional grievance submission systems are often confusing, available in only 
 JAN-SAMADHAN/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml             # GitHub Actions CI workflow
+│       └── ci.yml             # GitHub Actions CI workflow (lint, build, validation)
 ├── backend/                   # Express.js REST API
-│   ├── prisma/                # Prisma schema, migrations, and seed script
-│   ├── scripts/               # Automated E2E test scripts (test-e2e.ts)
+│   ├── prisma/                # Prisma schema, migrations, and seed data
+│   ├── scripts/               # Automated E2E test suite (test-e2e.ts)
 │   ├── src/                   # Backend TypeScript source code
 │   │   ├── config/            # Environment variables & database client
-│   │   ├── middleware/        # Authentication, authorization & file upload filters
+│   │   ├── middleware/        # Authentication, authorization, file upload filters
 │   │   ├── routes/            # Express API endpoint definitions
-│   │   ├── services/          # Business logic, SLA math, and AI handlers
-│   │   ├── utils/             # Zod input validation schemas
+│   │   ├── services/          # Business logic, SLA calculations, AI handlers
+│   │   ├── utils/             # Zod validation schemas
 │   │   ├── app.ts             # Express application & global middleware
 │   │   └── server.ts          # HTTP server bootstrap & graceful shutdown
-│   ├── uploads/               # Local directory for stored attachment files
+│   ├── uploads/               # Storage directory for uploaded attachments
 │   ├── package.json           # Backend dependencies and scripts
 │   └── README.md              # Backend-specific documentation
 ├── src/                       # React Frontend SPA
-│   ├── api/                   # Backend API client and service endpoints
+│   ├── api/                   # Backend API client & service endpoints
 │   ├── components/            # Reusable UI components (Modals, Headers, Footers)
-│   ├── context/               # Global React state (Auth, Grievances, Language)
-│   ├── data/                  # Localized department lists and UI constants
-│   ├── pages/                 # View pages (Home, Lodge, Track, MyGrievances, Appeal, etc.)
+│   ├── context/               # Global state providers (Auth, Grievances, Language)
+│   ├── data/                  # Localized department catalog & constants
+│   ├── pages/                 # Views (Home, Lodge, Track, MyGrievances, Appeal, etc.)
 │   ├── types.ts               # Shared TypeScript types
-│   ├── App.tsx                # App routing structure
-│   └── main.tsx               # Frontend entry point
+│   ├── App.tsx                # App routing configuration
+│   └── main.tsx               # Frontend root mount point
 ├── FRONTEND_README.md         # Frontend-specific documentation
 ├── README.md                  # Project overview (this file)
 └── package.json               # Frontend dependencies and scripts
 ```
-
-### Key Backend Folders Explained:
-- `backend/src/routes`: Declares URL paths for authentication, grievances, departments, AI, and attachments.
-- `backend/src/services`: Contains the core logic for managing database records, calculating SLAs, and handling business rules.
-- `backend/src/middleware`: Intercepts requests to verify JWT tokens, enforce role authorization, and validate file uploads.
-- `backend/src/utils`: Contains Zod schemas to guarantee all incoming data is valid and clean.
-- `backend/prisma`: Contains the database schema definition, database migration files, and initial seed data.
 
 ---
 
@@ -106,34 +83,27 @@ Citizen Browser (React SPA)
        ▼ (HTTP REST API with Bearer JWT)
 Express Backend Server
        │
-       ├─► Zod Validation & Auth Middleware
+       ├─► Zod Validation & Authentication Middleware
        ├─► Services (SLA logic & business rules)
        ├─► File System (Stores uploads in ./uploads)
        │
-       ▼ (Type-safe database queries via Prisma ORM)
+       ▼ (Type-safe queries via Prisma ORM)
 PostgreSQL Database (Stores users, departments, grievances, timelines)
 ```
 
-1. **Grievance Lodging**: The citizen enters grievance details (or speaks into the voice tool). AI analyzes the text to recommend a department.
-2. **Persistence**: The backend validates the inputs with Zod and stores the record in PostgreSQL using Prisma.
-3. **Attachments**: Files are checked for permitted types (images/PDF) and safely stored in the upload directory.
-4. **Tracking**: The citizen receives a tracking reference and can view real-time timeline updates.
+1. **Lodging a Grievance**: The citizen submits a complaint (or uses voice speech-to-text). AI analyzes the text to suggest the right department.
+2. **Database Persistence**: The backend validates the payload using Zod and saves the record in PostgreSQL via Prisma ORM.
+3. **Handling Attachments**: Attached documents (`.jpg`, `.jpeg`, `.png`, `.pdf`, `.doc`, `.docx`) are validated by format and size, and stored in `./uploads`.
+4. **Tracking & Resolution**: The citizen tracks progress with their unique reference number and reviews the timeline as officials update the status.
 
 ---
 
 ## Database
 
-- **Database**: PostgreSQL is used to store all core application data.
-- **ORM**: Prisma ORM provides type-safe schema modeling and database queries.
-- **Core Entities**:
-  - `User`: Citizens, Department Officials, and Administrators.
-  - `Department`: Government departments (Water Supply, Electricity, etc.).
-  - `Grievance`: Complaint record with description, category, location, and status.
-  - `Attachment`: Metadata for files uploaded with a grievance.
-  - `TimelineEvent`: History of status updates and official notes.
-  - `Feedback`: Rating and review provided by the citizen upon resolution.
-  - `Appeal`: Escalation record submitted if a resolution is unsatisfactory.
-- **Migrations & Seed**:
+- **Database Engine**: PostgreSQL is used for all application data.
+- **ORM**: Prisma ORM provides type-safe models, relationships, and queries.
+- **Core Entities**: `User`, `Department`, `Grievance`, `Attachment`, `TimelineEvent`, `Feedback`, `Appeal`.
+- **Database Management**:
   - `npm run prisma:deploy` applies existing database migrations.
   - `npm run prisma:seed` populates default departments and sample official accounts.
 
@@ -141,55 +111,55 @@ PostgreSQL Database (Stores users, departments, grievances, timelines)
 
 ## Authentication
 
-- **JWT Tokens**: Authentication uses JSON Web Tokens signed with a secret key (`JWT_SECRET`).
-- **Password Hashing**: User passwords are encrypted using `bcrypt`.
-- **SPA Session Storage**: The JWT is stored in the browser's `localStorage` for the current Single Page Application and sent in the `Authorization: Bearer <token>` header.
-- **Security Note**: `localStorage` is used for the frontend SPA client; future production hardening can optionally use secure `HttpOnly` cookies.
-- **Demo Mode**: Demo/OTP authentication is strictly restricted to development/test environments (`DEMO_AUTH_ENABLED=true` and `NODE_ENV !== 'production'`) and is hard-disabled in production.
+- **JWT Tokens**: Authentication uses JSON Web Tokens signed with `JWT_SECRET`.
+- **Password Security**: Passwords are securely hashed using `bcrypt` (12 salt rounds).
+- **Session Storage**: The JWT is stored in browser `localStorage` for the current Single Page Application and passed in the `Authorization: Bearer <token>` header.
+- **Security Note**: `localStorage` is used for the client SPA; future production hardening can optionally adopt secure `HttpOnly` cookies.
+- **Development Demo Mode**: Demo/OTP login is restricted to development and testing environments (`DEMO_AUTH_ENABLED=true` and `NODE_ENV !== 'production'`) and is disabled in production.
 
 ---
 
-## Running the Project
+## Running the Project Locally
 
 ### 1. Backend Setup
 
-Open a terminal and navigate to the backend folder:
+Open a terminal and navigate to `backend/`:
 
 ```bash
 cd backend
 
-# 1. Install dependencies
+# Install dependencies
 npm ci
 
-# 2. Setup environment variables
+# Configure environment variables
 cp .env.example .env
 
-# 3. Apply database migrations
+# Apply database migrations
 npm run prisma:deploy
 
-# 4. Seed the database with departments
+# Seed initial departments
 npm run prisma:seed
 
-# 5. Start the backend development server
+# Start development server
 npm run dev
 ```
-*The backend server will run at `http://localhost:5000`.*
+*Backend runs at `http://localhost:5000` (Health check at `http://localhost:5000/health`).*
 
 ### 2. Frontend Setup
 
-Open a **separate terminal** in the root project folder:
+Open a **separate terminal** in the project root:
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 npm ci
 
-# 2. Setup environment variables
+# Configure environment variables
 cp .env.example .env
 
-# 3. Start the frontend development server
+# Start development server
 npm run dev
 ```
-*The frontend application will run at `http://localhost:5173`.*
+*Frontend runs at `http://localhost:5173`.*
 
 ---
 
@@ -216,11 +186,9 @@ VITE_API_BASE_URL=http://localhost:5000/api
 
 ## Testing & Quality Checks
 
-All commands match current `package.json` scripts:
-
 ### Frontend
 ```bash
-# Run ESLint check
+# Run ESLint
 npm run lint
 
 # Run production build
@@ -245,45 +213,45 @@ npx tsx scripts/test-e2e.ts
 
 ## Security Protections
 
-- **IDOR Protection**: Citizens can only view, download attachments for, or modify grievances that belong to their user account.
-- **Input Validation**: All incoming API requests are validated with strict Zod schemas before processing.
-- **Path Traversal Defense**: File downloads verify that filepaths remain strictly confined inside the configured upload folder.
-- **File Upload Restrictions**: File uploads are restricted by size (default 5 MB) and limited to whitelisted formats (`.jpg`, `.jpeg`, `.png`, `.pdf`, `.doc`, `.docx`).
-- **Rate Limiting**: Protected API routes use rate limiting to guard against abuse.
-- **Production Error Sanitization**: Internal database error stacks are hidden from API responses in production mode.
+- **IDOR Protection**: Citizens can only view, download attachments for, and mutate grievances that belong to their account.
+- **Input Validation**: All incoming requests are validated against strict Zod schemas before reaching business logic.
+- **Path Traversal Protection**: File download endpoints verify that filepaths remain strictly contained within `UPLOAD_DIR`.
+- **File Upload Whitelist**: Only permitted formats (`.jpg`, `.jpeg`, `.png`, `.pdf`, `.doc`, `.docx`) up to 5 MB are accepted.
+- **Rate Limiting**: Express rate limiting protects API routes from brute-force traffic.
+- **Error Sanitization**: Database error details and stacks are sanitized in production responses.
 
 ---
 
 ## Deployment Notes
 
-### What Is Implemented & Ready:
-- Full frontend/backend API communication.
-- Database models, migrations, and seeding scripts.
-- Secure authentication and role-based permissions.
-- Health probe endpoint at `/health` (`SELECT 1` readiness check).
-- Automated CI pipeline in GitHub Actions.
+### Implemented & Ready:
+- Full Frontend ↔ Backend REST API integration.
+- PostgreSQL models, migrations, and seed scripts.
+- Secure JWT authentication, IDOR guards, and file validation.
+- Live database health probe (`GET /health`).
+- GitHub Actions CI workflow (lint, build, validation).
 
 ### Requirements for Live Production Deployment:
-- **Production PostgreSQL**: A managed PostgreSQL database instance.
-- **Strong Secrets**: A secure, randomly generated `JWT_SECRET`.
-- **Live SMS Gateway**: Integration with a real SMS provider (e.g., Twilio or Government SMS Gateway) to deliver live OTP messages.
-- **Object Storage**: For multi-server or containerized deployments, use S3-compatible cloud storage instead of local `./uploads`.
-- **SPA Routing**: Web servers (Nginx, Netlify, Vercel) must rewrite all non-asset requests to `/index.html`.
+- **Production PostgreSQL**: A dedicated managed PostgreSQL database instance.
+- **Production Secrets**: Secure, randomly generated `JWT_SECRET`.
+- **Live SMS Gateway**: Integration with a commercial/government SMS gateway for live OTP delivery.
+- **Cloud Object Storage**: Transition from local `./uploads` to an S3-compatible cloud storage service for distributed/containerized hosting.
+- **SPA Routing**: Web servers (Nginx, Netlify, Vercel) must rewrite all non-asset routes to `/index.html`.
 
 ---
 
 ## Current Status
 
-- ✅ Full Frontend ↔ Backend REST API integration complete.
+- ✅ Full Frontend ↔ Backend REST API integration implemented and tested.
 - ✅ PostgreSQL database schema and migrations verified.
 - ✅ Automated E2E integration and security test suite passing 100%.
-- ✅ GitHub Actions CI workflow active and green.
+- ✅ GitHub Actions CI pipeline active and green.
 
 ---
 
 ## Future Improvements
 
 - Integration with official Government SMS Gateways for live OTP delivery.
-- Cloud object storage (AWS S3 / Cloudflare R2 / Azure Blob) for file attachments.
+- Cloud object storage integration (AWS S3 / Cloudflare R2 / Azure Blob) for file attachments.
 - Single Sign-On (SSO) integration (e.g., MeriPehchaan / DigiLocker).
-- Push/Email notification system for status updates.
+- Push and email notifications for grievance status updates.

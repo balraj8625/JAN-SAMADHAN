@@ -1,6 +1,6 @@
 # JAN-SAMADHAN Frontend
 
-The frontend for **JAN-SAMADHAN** is a modern Single Page Application (SPA) built using React, TypeScript, and Vite. It provides a clean, responsive, and multilingual interface for citizens to lodge complaints, upload documents, track real-time progress, and submit feedback.
+The frontend for **JAN-SAMADHAN** is a Single Page Application (SPA) built using React, TypeScript, and Vite. It provides a clean, responsive, and multilingual interface for citizens to lodge complaints, upload supporting evidence, track real-time progress, and submit feedback.
 
 ---
 
@@ -8,8 +8,8 @@ The frontend for **JAN-SAMADHAN** is a modern Single Page Application (SPA) buil
 
 - **React 19**: Modern UI component library.
 - **TypeScript**: Type safety across all components, API models, and contexts.
-- **Vite 7**: Ultra-fast build tool and development server.
-- **Tailwind CSS**: Utility-first styling and accessible components.
+- **Vite 7**: Fast build tool and development server.
+- **Tailwind CSS**: Utility-first styling and responsive layouts.
 - **React Router v7**: Client-side page routing.
 - **React Context API**: State management for user authentication, grievance data, and active language.
 - **Lucide Icons & Framer Motion**: UI iconography and smooth interactive animations.
@@ -52,6 +52,15 @@ src/
 ├── App.tsx                    # Top-level routing setup
 └── main.tsx                   # React root mount point
 ```
+
+---
+
+## Supported File Attachments
+
+When lodging a grievance, citizens can attach evidence supporting these formats:
+- Images: `.jpg`, `.jpeg`, `.png`
+- Documents: `.pdf`, `.doc`, `.docx`
+- Size limit: Up to 5 MB per file
 
 ---
 

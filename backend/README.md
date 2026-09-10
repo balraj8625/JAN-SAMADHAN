@@ -81,7 +81,7 @@ backend/
 - `GET /api/grievances/:id/escalation-check` - Query SLA remaining days and escalation status.
 
 ### Attachments (`/api/grievances/:id/attachments`)
-- `POST /api/grievances/:id/attachments` - Upload file attachment (PDF, JPG, PNG).
+- `POST /api/grievances/:id/attachments` - Upload file attachment (`.jpg`, `.jpeg`, `.png`, `.pdf`, `.doc`, `.docx` up to 5 MB).
 - `GET /api/grievances/:id/attachments` - List all attachments for a grievance.
 - `GET /api/grievances/:id/attachments/:attachmentId/download` - Download attachment file (Protected against path traversal).
 
@@ -95,7 +95,7 @@ backend/
 ## Database Models & Migrations
 
 - **Database Engine**: PostgreSQL
-- **Schema File**: [`backend/prisma/schema.prisma`](file:///c:/Users/Asus/Downloads/jan%20samadhan/JAN-SAMADHAN/backend/prisma/schema.prisma)
+- **Schema File**: [`schema.prisma`](./prisma/schema.prisma)
 - **Key Models**: `User`, `Department`, `Grievance`, `Attachment`, `TimelineEvent`, `Feedback`, `Appeal`.
 
 ### Database Commands:
@@ -171,4 +171,5 @@ This script verifies user registration, login, grievance creation, attachments, 
 
 - **IDOR Protection**: All citizen queries enforce `where: { id, userId: req.user.id }`. Citizens cannot access other citizens' records.
 - **Path Traversal Protection**: Attachment downloads ensure that the resolved path stays inside `UPLOAD_DIR`.
+- **Supported File Types**: Allowed formats are strictly limited to `.jpg`, `.jpeg`, `.png`, `.pdf`, `.doc`, and `.docx` (maximum 5 MB).
 - **File Storage**: Uploads are saved to `./uploads` by default. For containerized cloud environments (Kubernetes, AWS ECS), connect an S3-compatible cloud storage driver or persistent volume mount.

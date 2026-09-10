@@ -99,7 +99,9 @@ export interface User {
   id: string;
   name: string;
   mobile: string;
-  district: string;
+  email?: string | null;
+  preferredLanguage?: string;
+  district?: string;
   isLoggedIn: boolean;
 }
 

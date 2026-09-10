@@ -1,44 +1,108 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ShieldAlert,
   CheckCircle2,
   ArrowRight,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
 import { useLanguage } from '../context/useLanguage';
 import { useGrievance } from '../context/useGrievance';
+import type { Grievance } from '../types';
 
 export const AppealPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { getGrievanceById, submitAppeal } = useGrievance();
+  const { getGrievanceById, fetchGrievanceByRefOrId, submitAppeal } = useGrievance();
 
-  const paramId = searchParams.get('id') || 'JS-2025-77210';
-  const grievance = getGrievanceById(paramId);
+  const paramId = searchParams.get('id') || '';
+  const [fetchedGrievance, setFetchedGrievance] = useState<Grievance | null>(null);
+  const [isLoadingGrievance, setIsLoadingGrievance] = useState<boolean>(false);
 
-  const [reason, setReason] = useState<string>('reasonDelay');
+  const [reasonKey, setReasonKey] = useState<string>('reasonDelay');
   const [remarks, setRemarks] = useState<string>('');
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [generatedAppealId, setGeneratedAppealId] = useState<string>('');
+  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const grievance = getGrievanceById(paramId) || fetchedGrievance;
+
+  useEffect(() => {
+    if (!paramId) return;
+    let isMounted = true;
+    void fetchGrievanceByRefOrId(paramId)
+      .then((g) => {
+        if (isMounted && g) setFetchedGrievance(g);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (isMounted) setIsLoadingGrievance(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [paramId, fetchGrievanceByRefOrId]);
 
   const isAlreadyAppealed = Boolean(grievance?.appeal);
   const isAppealSuccess = isSubmitted || isAlreadyAppealed;
   const activeAppealId = generatedAppealId || grievance?.appeal?.appealId || '';
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!remarks.trim()) return;
+  const getFullReasonText = (key: string): string => {
+    switch (key) {
+      case 'reasonDelay':
+        return 'Standard 21-day timeline has elapsed without resolution';
+      case 'reasonUnsatisfied':
+        return 'Unsatisfied with the ground resolution reported by nodal officer';
+      case 'reasonWrongAction':
+        return 'Incorrect department action or incomplete repair work';
+      default:
+        return 'Citizen requested administrative review';
+    }
+  };
 
-    submitAppeal(paramId, reason, remarks);
-    setGeneratedAppealId(`JS-APP-2025-${Math.floor(100 + Math.random() * 900)}`);
-    setIsSubmitted(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!paramId) {
+      setErrorMsg('Invalid grievance ID for appeal.');
+      return;
+    }
+
+    const trimmedRemarks = remarks.trim();
+    if (trimmedRemarks.length < 20) {
+      setErrorMsg('Please explain your appeal reason with at least 20 characters of detail.');
+      return;
+    }
+
+    setErrorMsg('');
+    setIsSubmitting(true);
+
+    try {
+      const appealId = await submitAppeal(
+        paramId,
+        getFullReasonText(reasonKey),
+        trimmedRemarks
+      );
+      setGeneratedAppealId(appealId);
+      setIsSubmitted(true);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Failed to submit appeal. Note: Appeals are permitted after grievance resolution or SLA breach.';
+      setErrorMsg(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      <BackButton to={`/track?id=${paramId}`} />
+      <BackButton to={paramId ? `/track?id=${paramId}` : '/'} />
 
       <div className="space-y-1">
         <h1 className="text-2xl font-black text-[#0B2545] font-serif flex items-center gap-2">
@@ -50,7 +114,30 @@ export const AppealPage: React.FC = () => {
         </p>
       </div>
 
-      {isAppealSuccess ? (
+      {isLoadingGrievance ? (
+        <div className="bg-white border border-slate-200 rounded-lg p-12 text-center space-y-3">
+          <Loader2 className="w-8 h-8 text-amber-600 animate-spin mx-auto" />
+          <p className="text-xs font-semibold text-slate-600">
+            Loading grievance details...
+          </p>
+        </div>
+      ) : !paramId ? (
+        <div className="bg-white border border-slate-200 rounded-lg p-8 text-center space-y-3">
+          <AlertCircle className="w-10 h-10 text-amber-600 mx-auto" />
+          <h3 className="text-base font-bold text-slate-900">
+            No Grievance ID Specified
+          </h3>
+          <p className="text-xs text-slate-600 max-w-md mx-auto">
+            Please select a grievance from My Grievances to file an appeal.
+          </p>
+          <button
+            onClick={() => navigate('/my-grievances')}
+            className="px-4 py-2 bg-[#0B2545] text-white text-xs font-bold rounded-md cursor-pointer"
+          >
+            Go to My Grievances
+          </button>
+        </div>
+      ) : isAppealSuccess ? (
         <div className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 space-y-6 text-center shadow-xs">
           <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-10 h-10" />
@@ -61,13 +148,15 @@ export const AppealPage: React.FC = () => {
               {t('appealSuccessTitle')}
             </h2>
             <p className="text-xs text-slate-600">
-              Your First Appeal has been registered and directly routed to the District First Appellate Authority.
+              Your First Appeal has been registered in the system and routed to the First Appellate Authority.
             </p>
-            <div className="inline-block px-4 py-2 bg-amber-100 border border-amber-300 rounded-md">
-              <span className="text-lg font-mono font-black text-amber-900">
-                Appeal Ref ID: {activeAppealId}
-              </span>
-            </div>
+            {activeAppealId && (
+              <div className="inline-block px-4 py-2 bg-amber-100 border border-amber-300 rounded-md">
+                <span className="text-lg font-mono font-black text-amber-900">
+                  Appeal Ref ID: {activeAppealId}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="p-4 bg-slate-50 border border-slate-200 rounded-md text-left text-xs space-y-2">
@@ -96,6 +185,12 @@ export const AppealPage: React.FC = () => {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
+          {errorMsg && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded-md text-xs font-medium">
+              {errorMsg}
+            </div>
+          )}
+
           <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-5 shadow-2xs">
             {grievance && (
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-md space-y-2 text-xs">
@@ -136,8 +231,8 @@ export const AppealPage: React.FC = () => {
                     type="radio"
                     name="appealReason"
                     value="reasonDelay"
-                    checked={reason === 'reasonDelay'}
-                    onChange={() => setReason('reasonDelay')}
+                    checked={reasonKey === 'reasonDelay'}
+                    onChange={() => setReasonKey('reasonDelay')}
                     className="mt-0.5 text-amber-600 focus:ring-amber-500 cursor-pointer"
                   />
                   <span className="font-bold text-slate-800">
@@ -150,8 +245,8 @@ export const AppealPage: React.FC = () => {
                     type="radio"
                     name="appealReason"
                     value="reasonUnsatisfied"
-                    checked={reason === 'reasonUnsatisfied'}
-                    onChange={() => setReason('reasonUnsatisfied')}
+                    checked={reasonKey === 'reasonUnsatisfied'}
+                    onChange={() => setReasonKey('reasonUnsatisfied')}
                     className="mt-0.5 text-amber-600 focus:ring-amber-500 cursor-pointer"
                   />
                   <span className="font-bold text-slate-800">
@@ -164,8 +259,8 @@ export const AppealPage: React.FC = () => {
                     type="radio"
                     name="appealReason"
                     value="reasonWrongAction"
-                    checked={reason === 'reasonWrongAction'}
-                    onChange={() => setReason('reasonWrongAction')}
+                    checked={reasonKey === 'reasonWrongAction'}
+                    onChange={() => setReasonKey('reasonWrongAction')}
                     className="mt-0.5 text-amber-600 focus:ring-amber-500 cursor-pointer"
                   />
                   <span className="font-bold text-slate-800">
@@ -184,7 +279,7 @@ export const AppealPage: React.FC = () => {
                 rows={4}
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Explain why the field resolution is incomplete or why the delay is unjustified..."
+                placeholder="Explain why the field resolution is incomplete or why the delay is unjustified (minimum 20 characters)..."
                 className="w-full p-3 border border-slate-300 rounded-md text-xs font-medium text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
                 required
               ></textarea>
@@ -194,10 +289,20 @@ export const AppealPage: React.FC = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-red-700 hover:bg-red-800 text-white font-extrabold text-sm rounded-md shadow-xs transition-colors cursor-pointer"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-red-700 hover:bg-red-800 disabled:bg-red-400 text-white font-extrabold text-sm rounded-md shadow-xs transition-colors cursor-pointer"
             >
-              <span>{t('btnSubmitAppeal')}</span>
-              <ArrowRight className="w-4 h-4" />
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Submitting Appeal...</span>
+                </>
+              ) : (
+                <>
+                  <span>{t('btnSubmitAppeal')}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
         </form>

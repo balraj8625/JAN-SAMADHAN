@@ -12,14 +12,32 @@ import { BackButton } from '../components/BackButton';
 import { useLanguage } from '../context/useLanguage';
 import { useGrievance } from '../context/useGrievance';
 
+import type { Grievance } from '../types';
+
 export const SuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { getGrievanceById } = useGrievance();
+  const { getGrievanceById, fetchGrievanceByRefOrId } = useGrievance();
 
-  const grievanceId = searchParams.get('id') || 'JS-2025-88392';
-  const grievance = getGrievanceById(grievanceId);
+  const grievanceId = searchParams.get('id') || '';
+  const [fetchedGrievance, setFetchedGrievance] = React.useState<Grievance | null>(null);
+
+  React.useEffect(() => {
+    if (!grievanceId) return;
+    let isMounted = true;
+    void fetchGrievanceByRefOrId(grievanceId)
+      .then((g) => {
+        if (isMounted && g) setFetchedGrievance(g);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [grievanceId, fetchGrievanceByRefOrId]);
+
+  const grievance = getGrievanceById(grievanceId) || fetchedGrievance;
 
   const handlePrint = () => {
     window.print();

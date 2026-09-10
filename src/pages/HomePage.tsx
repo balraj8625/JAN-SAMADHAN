@@ -31,8 +31,8 @@ export const HomePage: React.FC = () => {
     }
   };
 
-  const handlePickSample = (problemText: string) => {
-    analyzeProblemAI(problemText);
+  const handlePickSample = async (problemText: string) => {
+    await analyzeProblemAI(problemText);
     setDraft((prev) => ({
       ...prev,
       description: problemText,

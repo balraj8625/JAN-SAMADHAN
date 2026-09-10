@@ -17,29 +17,31 @@ import { BackButton } from '../components/BackButton';
 import { VoiceModal } from '../components/VoiceModal';
 import { useLanguage } from '../context/useLanguage';
 import { useGrievance } from '../context/useGrievance';
-import { mockDepartments } from '../data/mockDepartments';
-import type { Attachment } from '../types';
+import { useAuth } from '../context/useAuth';
+import { Loader2 } from 'lucide-react';
 
 export const LodgeGrievancePage: React.FC = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
-  const { draft, setDraft, analyzeProblemAI, submitGrievance } = useGrievance();
+  const { user, openLoginModal } = useAuth();
+  const { draft, setDraft, departments, analyzeProblemAI, submitGrievance } = useGrievance();
 
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isVoiceOpen, setIsVoiceOpen] = useState<boolean>(false);
   const [isDeptModalOpen, setIsDeptModalOpen] = useState<boolean>(false);
   const [declarationAccepted, setDeclarationAccepted] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Handle Step 1 Next
-  const handleStep1Submit = (e: React.FormEvent) => {
+  const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!draft.description.trim() || draft.description.trim().length < 10) {
       setErrorMsg('Please describe your grievance in at least 10 words so we can process it.');
       return;
     }
     setErrorMsg('');
-    analyzeProblemAI(draft.description);
+    await analyzeProblemAI(draft.description);
     setCurrentStep(2);
   };
 
@@ -54,24 +56,40 @@ export const LodgeGrievancePage: React.FC = () => {
   };
 
   // Handle Step 4 Final Submit
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     if (!declarationAccepted) {
       setErrorMsg('Please confirm the self-declaration checkbox before submitting.');
       return;
     }
-    const newGrievance = submitGrievance();
-    navigate(`/success?id=${newGrievance.id}`);
+    if (!user) {
+      setErrorMsg('Please sign in or register to submit your grievance.');
+      openLoginModal();
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      const newGrievance = await submitGrievance();
+      navigate(`/success?id=${newGrievance.id}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to submit grievance. Please try again.';
+      setErrorMsg(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // Simulated File Upload
+  // File Upload with real File attached
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const newAtt: Attachment = {
+      const newAtt = {
         id: `att-${Date.now()}`,
         name: file.name,
         size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        type: file.type || 'image/jpeg',
+        type: file.type || 'application/octet-stream',
+        file: file,
       };
       setDraft((prev) => ({
         ...prev,
@@ -88,7 +106,13 @@ export const LodgeGrievancePage: React.FC = () => {
   };
 
   const currentDepartment =
-    mockDepartments.find((d) => d.id === draft.departmentId) || mockDepartments[0];
+    departments.find((d) => d.id === draft.departmentId) || departments[0] || {
+      id: 'water_supply_dept',
+      name: { en: 'Water Supply', hi: 'जल आपूर्ति', mr: 'पाणी पुरवठा' },
+      iconName: 'Building2',
+      commonIssues: [],
+      requiredFields: [],
+    };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -626,10 +650,20 @@ export const LodgeGrievancePage: React.FC = () => {
             <button
               type="button"
               onClick={handleFinalSubmit}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-base rounded-md shadow-xs transition-colors cursor-pointer"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white font-black text-base rounded-md shadow-xs transition-colors cursor-pointer"
             >
-              <span>{t('btnSubmitGrievance')}</span>
-              <CheckCircle2 className="w-5 h-5" />
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Submitting Grievance...</span>
+                </>
+              ) : (
+                <>
+                  <span>{t('btnSubmitGrievance')}</span>
+                  <CheckCircle2 className="w-5 h-5" />
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -652,7 +686,7 @@ export const LodgeGrievancePage: React.FC = () => {
             </div>
 
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-              {mockDepartments.map((dept) => (
+              {departments.map((dept) => (
                 <button
                   key={dept.id}
                   type="button"

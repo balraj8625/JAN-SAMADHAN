@@ -68,7 +68,6 @@ JAN-SAMADHAN/
 │   ├── types.ts               # Shared TypeScript types
 │   ├── App.tsx                # App routing configuration
 │   └── main.tsx               # Frontend root mount point
-├── FRONTEND_README.md         # Frontend-specific documentation
 ├── README.md                  # Project overview (this file)
 └── package.json               # Frontend dependencies and scripts
 ```

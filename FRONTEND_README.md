@@ -1,107 +1,117 @@
 # JAN-SAMADHAN Frontend
 
-The frontend client for **JAN-SAMADHAN** is a React 19 Single Page Application (SPA) built with Vite and TypeScript. It offers an intuitive, accessible, and multilingual interface designed for citizens to lodge grievances, track progress, review resolutions, and file appeals.
+The frontend for **JAN-SAMADHAN** is a modern Single Page Application (SPA) built using React, TypeScript, and Vite. It provides a clean, responsive, and multilingual interface for citizens to lodge complaints, upload documents, track real-time progress, and submit feedback.
 
 ---
 
-## 🏛️ Key Features
+## Technologies Used
 
-- **Multilingual Support**: Real-time interface translation across English, Hindi (हिन्दी), and Marathi (मराठी).
-- **Speech-to-Text & AI Copilot**: Voice input modal for hands-free description entry, AI text analysis, grievance letter draft generation, and official response simplifier.
-- **Real Backend Integration**: Directly connected to the Express + PostgreSQL backend with JWT authentication and local storage persistence.
-- **Interactive SLA & Timeline Tracking**: Live countdown of SLA resolution targets and step-by-step resolution event history.
-- **Attachment Upload**: Drag-and-drop file upload with format and size validation.
+- **React 19**: Modern UI component library.
+- **TypeScript**: Type safety across all components, API models, and contexts.
+- **Vite 7**: Ultra-fast build tool and development server.
+- **Tailwind CSS**: Utility-first styling and accessible components.
+- **React Router v7**: Client-side page routing.
+- **React Context API**: State management for user authentication, grievance data, and active language.
+- **Lucide Icons & Framer Motion**: UI iconography and smooth interactive animations.
 
 ---
 
-## 📂 Architecture & Directory Structure
+## Folder Structure
 
 ```text
 src/
-├── api/                           # Backend API client and service endpoints
-│   ├── client.ts                  # Base fetch wrapper, error handling & JWT injection
-│   ├── auth.ts                    # Register, login, me, verify OTP endpoints
-│   ├── grievances.ts              # Submit, list, get by ID, track by number, appeal, feedback
-│   ├── departments.ts             # Department catalog queries
-│   ├── ai.ts                      # AI draft generator, text analysis, response explainer
-│   ├── attachments.ts             # File upload and download helpers
-│   └── index.ts                   # Unified API export
-├── components/                    # UI Components
-│   ├── Header.tsx                 # Navigation bar, language selector, citizen login status
-│   ├── Footer.tsx                 # Portal links, accessibility statement, emergency helplines
-│   ├── LoginModal.tsx             # Citizen authentication modal (Password & OTP modes)
-│   ├── VoiceModal.tsx             # Browser speech recognition modal
-│   └── BackButton.tsx             # Contextual back navigation button
-├── context/                       # React Context Providers & State
-│   ├── AuthContext.tsx            # Global user authentication and session management
-│   ├── GrievanceContext.tsx       # Grievance CRUD, cache, filter state, and API binding
-│   ├── LanguageContext.tsx        # Active language selection and localization dictionaries
-│   └── use*.ts                    # Custom hooks (useAuth, useGrievance, useLanguage)
-├── data/                          # Department definitions and UI localization constants
-├── pages/                         # Application Views
-│   ├── HomePage.tsx               # Landing page with stats, action cards, and announcements
-│   ├── LodgeGrievancePage.tsx     # Grievance filing form with category picker & AI drafting
-│   ├── TrackGrievancePage.tsx     # Tracking by grievance number with SLA progress & appeals
-│   ├── MyGrievancesPage.tsx       # Citizen grievance dashboard with filter & export
-│   ├── AppealPage.tsx             # Grievance escalation and appeal form
-│   ├── SuccessPage.tsx            # Post-submission acknowledgment with tracking ID
-│   └── HelpPage.tsx               # FAQs, user manual, and contact info
-├── types.ts                       # Shared TypeScript types and interfaces
-├── App.tsx                        # Root routing setup (React Router v7)
-└── main.tsx                       # React DOM entry point
+├── api/                       # API client & backend service modules
+│   ├── client.ts              # Fetch wrapper, error formatting, and Bearer JWT injection
+│   ├── auth.ts                # Register, login, me, and OTP API calls
+│   ├── grievances.ts          # Grievance CRUD, tracking, appeals, and feedback API calls
+│   ├── departments.ts         # Department list fetching
+│   ├── ai.ts                  # AI draft generator and analysis calls
+│   ├── attachments.ts         # File upload and download helpers
+│   └── index.ts               # Unified API export
+├── components/                # Reusable UI components
+│   ├── Header.tsx             # Top navigation, language switcher, citizen login status
+│   ├── Footer.tsx             # Portal links, helpline numbers, accessibility info
+│   ├── LoginModal.tsx         # Citizen login and registration popup
+│   ├── VoiceModal.tsx         # Speech-to-text recording interface
+│   └── BackButton.tsx         # Context-aware back navigation button
+├── context/                   # Global React State Providers
+│   ├── AuthContext.tsx        # User authentication, profile, and session state
+│   ├── GrievanceContext.tsx   # Grievance list, draft form, filters, and API actions
+│   ├── LanguageContext.tsx    # Multi-language dictionary and active language state
+│   └── use*.ts                # Helper hooks (useAuth, useGrievance, useLanguage)
+├── data/                      # Localized department lists and UI constants
+├── pages/                     # Main Application Views
+│   ├── HomePage.tsx           # Landing page with stats, service cards, announcements
+│   ├── LodgeGrievancePage.tsx # Step-by-step grievance submission form
+│   ├── TrackGrievancePage.tsx # Reference number lookup with visual timeline
+│   ├── MyGrievancesPage.tsx   # Citizen's personal grievance history dashboard
+│   ├── AppealPage.tsx         # Formal grievance escalation form
+│   ├── SuccessPage.tsx        # Submission confirmation receipt with tracking number
+│   └── HelpPage.tsx           # Frequently Asked Questions and user guide
+├── types.ts                   # TypeScript interfaces for frontend data
+├── App.tsx                    # Top-level routing setup
+└── main.tsx                   # React root mount point
 ```
 
 ---
 
-## ⚙️ Environment Variables
+## How the Frontend Communicates with the Backend
 
-The frontend connects to the backend API via `VITE_API_BASE_URL`.
+1. **API Client (`src/api/client.ts`)**:
+   - Outgoing requests use `fetch` targeting the backend base URL configured in `VITE_API_BASE_URL`.
+   - If a valid JWT token exists in `localStorage` (`jan_samadhan_token`), it is automatically attached as an `Authorization: Bearer <token>` header.
+   - If the backend returns `401 Unauthorized`, the client clears the stored token and resets the session.
+2. **Context Providers (`src/context/`)**:
+   - `AuthContext`: Manages sign-in, sign-up, and session restoration on page load (`/api/auth/me`).
+   - `GrievanceContext`: Fetches user grievances, coordinates AI assistance, and submits new grievance payloads.
 
-Create a `.env` file in the root repository folder:
+---
+
+## Authentication in the Frontend
+
+- The frontend currently stores the JWT in browser `localStorage`.
+- When the user signs in, the token is saved, and user details are populated.
+- When the user signs out, the token is deleted from `localStorage`.
+- *Production Note*: For high-security enterprise environments, teams can optionally migrate from `localStorage` to `HttpOnly` cookies.
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the root folder:
+
 ```env
-# URL pointing to the running JAN-SAMADHAN backend API
+# URL of your JAN-SAMADHAN Express backend API
 VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
-If not provided, the API client defaults to `http://localhost:5000/api`.
-
 ---
 
-## 🚀 Development & Build Commands
+## Local Development & Build Commands
 
-All commands are executed from the **root** repository directory:
+Run all commands from the **root** folder:
 
 ```bash
-# Install exact dependencies
+# Install dependencies
 npm ci
 
-# Start Vite development server with Hot Module Replacement (HMR)
+# Start local development server (with hot reload)
 npm run dev
 
-# Run ESLint across TypeScript source files
+# Run ESLint code quality checks
 npm run lint
 
-# Compile TypeScript and create production bundle in dist/
+# Compile TypeScript and build production bundle into dist/
 npm run build
 
-# Preview production build locally
+# Preview the built production files locally
 npm run preview
 ```
 
 ---
 
-## 🌐 API Client Layer & Authentication
+## Troubleshooting
 
-- The API client is located in [`src/api/client.ts`](file:///c:/Users/Asus/Downloads/jan%20samadhan/JAN-SAMADHAN/src/api/client.ts).
-- For the current Single Page Application implementation, the JWT token is stored in browser `localStorage` (`jan_samadhan_token`).
-- Outgoing API requests attach the token in the `Authorization: Bearer <token>` header.
-- On application mount, `AuthContext` calls `/api/auth/me` to validate the token and restore the citizen's profile.
-- If a `401 Unauthorized` response is received, the client safely clears invalid session tokens and updates UI state.
-- **Security Note**: In a future hardened production deployment, teams may choose to migrate from `localStorage` to secure `HttpOnly` `SameSite` cookies or another stronger session storage mechanism to further minimize XSS token exposure risks.
-
----
-
-## 🚢 Deployment Considerations
-
-- **Single Page Application (SPA) Routing**: In production web servers (Nginx, Caddy, Vercel, Netlify), ensure all non-asset requests are rewritten to `/index.html`.
-- **CORS**: Ensure the backend's `FRONTEND_URL` environment variable matches your production frontend origin (e.g. `https://jansamadhan.gov.in`).
+- **CORS Errors**: Ensure the backend `.env` file has `FRONTEND_URL` set to the exact URL of your frontend (default: `http://localhost:5173`).
+- **Cannot connect to API**: Make sure the backend server is running and accessible at the URL in `VITE_API_BASE_URL`.
+- **SPA 404 on page refresh (Production)**: When hosting on Nginx, Apache, Netlify, or Vercel, configure rewrite rules so all non-asset requests load `/index.html`.

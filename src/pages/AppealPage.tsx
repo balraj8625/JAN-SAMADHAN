@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   ShieldAlert,
   CheckCircle2,
-  AlertTriangle,
-  FileText,
   ArrowRight,
-  Building2,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
 
 export const AppealPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -26,12 +23,9 @@ export const AppealPage: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [generatedAppealId, setGeneratedAppealId] = useState<string>('');
 
-  useEffect(() => {
-    if (grievance && grievance.appeal) {
-      setIsSubmitted(true);
-      setGeneratedAppealId(grievance.appeal.appealId);
-    }
-  }, [grievance]);
+  const isAlreadyAppealed = Boolean(grievance?.appeal);
+  const isAppealSuccess = isSubmitted || isAlreadyAppealed;
+  const activeAppealId = generatedAppealId || grievance?.appeal?.appealId || '';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +50,7 @@ export const AppealPage: React.FC = () => {
         </p>
       </div>
 
-      {isSubmitted ? (
+      {isAppealSuccess ? (
         <div className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 space-y-6 text-center shadow-xs">
           <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-10 h-10" />
@@ -71,7 +65,7 @@ export const AppealPage: React.FC = () => {
             </p>
             <div className="inline-block px-4 py-2 bg-amber-100 border border-amber-300 rounded-md">
               <span className="text-lg font-mono font-black text-amber-900">
-                Appeal Ref ID: {generatedAppealId}
+                Appeal Ref ID: {activeAppealId}
               </span>
             </div>
           </div>

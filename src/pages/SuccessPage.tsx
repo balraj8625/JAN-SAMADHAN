@@ -2,18 +2,15 @@ import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   CheckCircle2,
-  FileText,
   Search,
   MessageSquare,
   Printer,
   FilePlus,
-  ArrowRight,
   Clock,
-  ShieldCheck,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
 
 export const SuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();

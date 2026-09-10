@@ -2,19 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
-  Filter,
   Clock,
   AlertTriangle,
   CheckCircle2,
-  FileText,
-  Building2,
   ChevronRight,
   ShieldAlert,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
-import { GrievanceStatus } from '../types';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
+import type { GrievanceStatus } from '../types';
 
 export const MyGrievancesPage: React.FC = () => {
   const { t, language } = useLanguage();

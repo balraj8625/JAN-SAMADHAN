@@ -2,11 +2,11 @@ import { Department } from '../types';
 
 export const mockDepartments: Department[] = [
   {
-    id: 'water-supply',
+    id: 'water_supply_dept',
     name: {
       en: 'Department of Water Supply & Sanitation',
       hi: 'जल आपूर्ति एवं स्वच्छता विभाग',
-      mr: 'पानी पुरवठा व स्वच्छता विभाग',
+      mr: 'पाणी पुरवठा व स्वच्छता विभाग',
     },
     iconName: 'Droplet',
     commonIssues: [
@@ -63,11 +63,11 @@ export const mockDepartments: Department[] = [
     ],
   },
   {
-    id: 'ration-pds',
+    id: 'food_supply_dept',
     name: {
-      en: 'Department of Food, Civil Supplies & Consumer Affairs',
-      hi: 'खाद्य, नागरिक आपूर्ति एवं उपभोक्ता मामले विभाग',
-      mr: 'अन्न, नागरी पुरवठा व ग्राहक संरक्षण विभाग',
+      en: 'Food, Civil Supplies & Consumer Protection',
+      hi: 'खाद्य, नागरिक आपूर्ति और उपभोक्ता संरक्षण',
+      mr: 'अन्न, नागरी पुरवठा आणि ग्राहक संरक्षण',
     },
     iconName: 'ShoppingBag',
     commonIssues: [
@@ -124,11 +124,11 @@ export const mockDepartments: Department[] = [
     ],
   },
   {
-    id: 'roads-pwd',
+    id: 'roads_dept',
     name: {
-      en: 'Public Works Department (PWD) & Municipal Roads',
-      hi: 'लोक निर्माण विभाग (PWD) एवं नगर मार्ग',
-      mr: 'सार्वजनिक बांधकाम विभाग (PWD) व रस्ते',
+      en: 'Roads & Transport',
+      hi: 'सड़क और परिवहन',
+      mr: 'रस्ते आणि वाहतूक',
     },
     iconName: 'Construction',
     commonIssues: [
@@ -166,62 +166,11 @@ export const mockDepartments: Department[] = [
     ],
   },
   {
-    id: 'pension-social-welfare',
+    id: 'electricity_dept',
     name: {
-      en: 'Department of Social Justice & Pension Services',
-      hi: 'सामाजिक न्याय एवं पेंशन कल्याण विभाग',
-      mr: 'सामाजिक न्याय व निवृत्तीवेतन विभाग',
-    },
-    iconName: 'HeartHandshake',
-    commonIssues: [
-      {
-        en: 'Old age pension / Widow pension not credited for last 3 months',
-        hi: 'वृद्धावस्था पेंशन / विधवा पेंशन पिछले 3 महीनों से जमा नहीं हुई',
-        mr: 'श्रावणबाळ / श्रावण बाळ किंवा वृद्धपकाळ निवृत्तीवेतन ३ महिने मिळाले नाही',
-      },
-      {
-        en: 'Disability support allowance application pending',
-        hi: 'दिव्यांग सहायता भत्ता आवेदन लंबित है',
-        mr: 'दिव्यांग भत्ता अर्ज प्रलंबित आहे',
-      },
-    ],
-    requiredFields: [
-      {
-        key: 'pensionApplicationNo',
-        label: {
-          en: 'Pension Sanction ID / Application Ref No.',
-          hi: 'पेंशन स्वीकृति आईडी / आवेदन संदर्भ संख्या',
-          mr: 'निवृत्तीवेतन अर्ज / मंजुरी क्रमांक',
-        },
-        placeholder: {
-          en: 'e.g. PEN-SOC-8820',
-          hi: 'जैसे PEN-SOC-8820',
-          mr: 'उदा. PEN-SOC-8820',
-        },
-        required: true,
-      },
-      {
-        key: 'pensionType',
-        label: {
-          en: 'Type of Pension Scheme',
-          hi: 'पेंशन योजना का प्रकार',
-          mr: 'योजनेचा प्रकार',
-        },
-        placeholder: {
-          en: 'e.g. Indira Gandhi National Old Age Pension Scheme',
-          hi: 'जैसे इंदिरा गांधी राष्ट्रीय वृद्धावस्था पेंशन',
-          mr: 'उदा. श्रावणबाळ योजना / वृद्धपकाळ वेतन',
-        },
-        required: true,
-      },
-    ],
-  },
-  {
-    id: 'electricity-discom',
-    name: {
-      en: 'State Electricity Distribution Corporation (DISCOM)',
-      hi: 'राज्य विद्युत वितरण निगम (डिस्कॉम)',
-      mr: 'राज्य वीज वितरण कंपनी (MSEDCL / MSEB)',
+      en: 'Electricity / Power Department',
+      hi: 'बिजली / विद्युत विभाग',
+      mr: 'वीज / वीज विभाग',
     },
     iconName: 'Zap',
     commonIssues: [
@@ -258,4 +207,364 @@ export const mockDepartments: Department[] = [
       },
     ],
   },
+  {
+    id: 'education_dept',
+    name: {
+      en: 'Education / Scholarship',
+      hi: 'शिक्षा / छात्रवृत्ति',
+      mr: 'शिक्षण / शिष्यवृत्ती',
+    },
+    iconName: 'GraduationCap',
+    commonIssues: [
+      {
+        en: 'Scholarship amount not credited for current academic year',
+        hi: 'वर्तमान शैक्षणिक वर्ष के लिए छात्रवृत्ति राशि जमा नहीं हुई',
+        mr: 'चालू शैक्षणिक वर्षाची शिष्यवृत्ती जमा झालेली नाही',
+      },
+      {
+        en: 'Delay in admission verification or document approval',
+        hi: 'प्रवेश सत्यापन या दस्तावेज अनुमोदन में देरी',
+        mr: 'प्रवेश पडताळणी किंवा कागदपत्र मंजुरीत विलंब',
+      },
+      {
+        en: 'Lack of drinking water or basic infrastructure in government school',
+        hi: 'सरकारी स्कूल में पीने के पानी या बुनियादी ढांचे का अभाव',
+        mr: 'शासकीय शाळेत पिण्याचे पाणी किंवा पायाभूत सुविधांचा अभाव',
+      },
+    ],
+    requiredFields: [
+      {
+        key: 'applicationNumber',
+        label: {
+          en: 'Scholarship Application / Registration Number',
+          hi: 'छात्रवृत्ति आवेदन / पंजीकरण संख्या',
+          mr: 'शिष्यवृत्ती अर्ज / नोंदणी क्रमांक',
+        },
+        placeholder: {
+          en: 'e.g. SCH-2025-99120',
+          hi: 'जैसे SCH-2025-99120',
+          mr: 'उदा. SCH-2025-99120',
+        },
+        required: true,
+      },
+      {
+        key: 'institutionName',
+        label: {
+          en: 'School / College / Institute Name',
+          hi: 'स्कूल / कॉलेज / संस्थान का नाम',
+          mr: 'शाळा / महाविद्यालय / संस्थेचे नाव',
+        },
+        placeholder: {
+          en: 'e.g. Government Polytechnic College',
+          hi: 'जैसे गवर्नमेंट पॉलिटेक्निक कॉलेज',
+          mr: 'उदा. शासकीय तंत्रनिकेतन महाविद्यालय',
+        },
+        required: true,
+      },
+    ],
+  },
+  {
+    id: 'epfo_dept',
+    name: {
+      en: 'EPFO (Employees Provident Fund)',
+      hi: 'ईपीएफओ (कर्मचारी भविष्य निधि)',
+      mr: 'ईपीएफओ (कर्मचारी भविष्य निधी)',
+    },
+    iconName: 'HeartHandshake',
+    commonIssues: [
+      {
+        en: 'EPF withdrawal claim pending for more than 20 days',
+        hi: 'ईपीएफ निकासी दावा 20 दिनों से अधिक समय से लंबित है',
+        mr: 'ईपीएफ रक्कम काढण्याचा दावा २० दिवसांपेक्षा जास्त काळ प्रलंबित',
+      },
+      {
+        en: 'Employer not depositing monthly PF contribution',
+        hi: 'नियोक्ता द्वारा मासिक पीएफ अंशदान जमा नहीं किया जा रहा है',
+        mr: 'मालक/कंपनी दरमहा पीएफ रक्कम खात्यात भरत नाही',
+      },
+      {
+        en: 'UAN passbook not updating or KYC rejection without valid reason',
+        hi: 'यूएएन पासबुक अपडेट न होना या बिना कारण केवाईसी खारिज होना',
+        mr: 'यूएएन पासबुक अपडेट न होणे किंवा केवायसी नाकारणे',
+      },
+    ],
+    requiredFields: [
+      {
+        key: 'uanNumber',
+        label: {
+          en: 'Universal Account Number (UAN - 12 digits)',
+          hi: 'सार्वभौमिक खाता संख्या (UAN - 12 अंक)',
+          mr: 'युनिव्हर्सल खाते क्रमांक (UAN - १२ अंक)',
+        },
+        placeholder: {
+          en: 'e.g. 100912345678',
+          hi: 'जैसे 100912345678',
+          mr: 'उदा. १००९१२३४५६७८',
+        },
+        required: true,
+      },
+      {
+        key: 'establishmentId',
+        label: {
+          en: 'Employer / Establishment Code (if available)',
+          hi: 'प्रतिष्ठान / कंपनी कोड (यदि उपलब्ध हो)',
+          mr: 'कंपनी / आस्थापना कोड (उपलब्ध असल्यास)',
+        },
+        placeholder: {
+          en: 'e.g. MH/PUN/0012345/000',
+          hi: 'जैसे MH/PUN/0012345/000',
+          mr: 'उदा. MH/PUN/0012345/000',
+        },
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'railways_dept',
+    name: {
+      en: 'Railways',
+      hi: 'रेलवे',
+      mr: 'रेल्वे',
+    },
+    iconName: 'Train',
+    commonIssues: [
+      {
+        en: 'Ticket cancellation refund not credited to bank account',
+        hi: 'टिकट रद्दीकरण रिफंड बैंक खाते में जमा नहीं हुआ',
+        mr: 'तिकीट रद्द केल्याचा परतावा बँक खात्यात मिळाला नाही',
+      },
+      {
+        en: 'Poor hygiene or water scarcity in train coach',
+        hi: 'ट्रेन कोच में अस्वच्छता या पानी की कमी',
+        mr: 'रेल्वे डब्यात अस्वच्छता किंवा पाण्याची टंचाई',
+      },
+      {
+        en: 'Harassment or overcharging by pantry car staff',
+        hi: 'पैंट्री कार कर्मचारियों द्वारा अधिक शुल्क वसूली',
+        mr: 'पँट्री कर्मचाऱ्यांकडून जादा दर आकारणी',
+      },
+    ],
+    requiredFields: [
+      {
+        key: 'pnrNumber',
+        label: {
+          en: '10-Digit Railway PNR Number',
+          hi: '10 अंकों का रेलवे PNR नंबर',
+          mr: '१० अंकी रेल्वे PNR क्रमांक',
+        },
+        placeholder: {
+          en: 'e.g. 8421098765',
+          hi: 'जैसे 8421098765',
+          mr: 'उदा. ८४२१०९८७६५',
+        },
+        required: true,
+      },
+      {
+        key: 'trainNumber',
+        label: {
+          en: 'Train Name or Number',
+          hi: 'ट्रेन का नाम या नंबर',
+          mr: 'गाडीचे नाव किंवा क्रमांक',
+        },
+        placeholder: {
+          en: 'e.g. 12128 Pune Mumbai Intercity',
+          hi: 'जैसे 12128 पुणे मुंबई इंटरसिटी',
+          mr: 'उदा. १२१२८ पुणे मुंबई इंटरसिटी',
+        },
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'municipal_dept',
+    name: {
+      en: 'Municipal Services',
+      hi: 'नगरपालिका सेवाएं',
+      mr: 'नगरपालिका सेवा',
+    },
+    iconName: 'Building2',
+    commonIssues: [
+      {
+        en: 'Garbage not collected from residential area for 3+ days',
+        hi: 'आवासीय क्षेत्र से 3 दिनों से अधिक समय से कचरा नहीं उठाया गया',
+        mr: 'निवासी भागातून गेल्या ३ दिवसांपासून कचरा उचलला नाही',
+      },
+      {
+        en: 'Open sewage drain overflowing on street',
+        hi: 'सड़क पर खुले गटर का पानी बह रहा है',
+        mr: 'रस्त्यावर गटाराचे पाणी तुंबून वाहत आहे',
+      },
+      {
+        en: 'Stray animal menace in neighborhood',
+        hi: 'मोहल्ले में आवारा पशुओं का आतंक',
+        mr: 'परिसरात भटक्या जनावरांचा त्रास',
+      },
+    ],
+    requiredFields: [
+      {
+        key: 'wardNumber',
+        label: {
+          en: 'Ward / Zone Number',
+          hi: 'वार्ड / जोन संख्या',
+          mr: 'प्रभाग / वॉर्ड क्रमांक',
+        },
+        placeholder: {
+          en: 'e.g. Ward No. 18, Zone B',
+          hi: 'जैसे वार्ड नं. 18',
+          mr: 'उदा. प्रभाग क्र. १८',
+        },
+        required: true,
+      },
+      {
+        key: 'localityAddress',
+        label: {
+          en: 'Exact Locality / Street Address',
+          hi: 'सटीक मोहल्ला / सड़क का पता',
+          mr: 'तपशीलवार परिसर / रस्त्याचा पत्ता',
+        },
+        placeholder: {
+          en: 'e.g. Sector 4, Near Community Hall',
+          hi: 'जैसे सेक्टर 4, कम्युनिटी हॉल के पास',
+          mr: 'उदा. सेक्टर ४, समाज मंदिराशेजारी',
+        },
+        required: true,
+      },
+    ],
+  },
+  {
+    id: 'health_dept',
+    name: {
+      en: 'Health & Family Welfare',
+      hi: 'स्वास्थ्य और परिवार कल्याण',
+      mr: 'आरोग्य आणि कुटुंब कल्याण',
+    },
+    iconName: 'HeartPulse',
+    commonIssues: [
+      {
+        en: 'Essential medicines not available at Primary Health Center (PHC)',
+        hi: 'प्राथमिक स्वास्थ्य केंद्र (PHC) में आवश्यक दवाएं उपलब्ध नहीं हैं',
+        mr: 'प्राथमिक आरोग्य केंद्रात (PHC) आवश्यक औषधे उपलब्ध नाहीत',
+      },
+      {
+        en: 'Doctor or medical staff absent during emergency duty hours',
+        hi: 'आपातकालीन ड्यूटी समय के दौरान डॉक्टर या चिकित्सा कर्मचारी अनुपस्थित',
+        mr: 'तातडीच्या सेवेच्या वेळी वैद्यकीय अधिकारी गैरहजर',
+      },
+      {
+        en: 'Ayushman Bharat / PMJAY card denied by empanelled hospital',
+        hi: 'सूचीबद्ध अस्पताल द्वारा आयुष्मान भारत कार्ड से इलाज से इनकार',
+        mr: 'नोंदणीकृत रुग्णालयाने आयुष्मान भारत योजनेतून उपचार नाकारले',
+      },
+    ],
+    requiredFields: [
+      {
+        key: 'hospitalName',
+        label: {
+          en: 'Hospital / Primary Health Center (PHC) Name',
+          hi: 'अस्पताल / प्राथमिक स्वास्थ्य केंद्र (PHC) का नाम',
+          mr: 'रुग्णालय / प्राथमिक आरोग्य केंद्राचे नाव',
+        },
+        placeholder: {
+          en: 'e.g. District Civil Hospital',
+          hi: 'जैसे जिला नागरिक अस्पताल',
+          mr: 'उदा. जिल्हा शासकीय रुग्णालय',
+        },
+        required: true,
+      },
+      {
+        key: 'treatmentDate',
+        label: {
+          en: 'Date of Visit / Admission',
+          hi: 'भ्रमण / भर्ती की तिथि',
+          mr: 'भेटीची / उपचाराची तारीख',
+        },
+        placeholder: {
+          en: 'e.g. DD/MM/YYYY',
+          hi: 'जैसे DD/MM/YYYY',
+          mr: 'उदा. DD/MM/YYYY',
+        },
+        required: false,
+      },
+    ],
+  },
+  {
+    id: 'housing_dept',
+    name: {
+      en: 'Housing & Urban Development',
+      hi: 'आवास और शहरी विकास',
+      mr: 'निवास और शहरी विकास',
+    },
+    iconName: 'Home',
+    commonIssues: [
+      {
+        en: 'PMAY housing scheme subsidy installment delayed',
+        hi: 'पीएम आवास योजना की सब्सिडी किस्त में देरी',
+        mr: 'प्रधानमंत्री आवास योजनेचा (PMAY) अनुदान हप्ता प्रलंबित',
+      },
+      {
+        en: 'Delay in physical possession of allotted government housing unit',
+        hi: 'आवंटित सरकारी आवास का भौतिक कब्जा मिलने में देरी',
+        mr: 'मंजूर शासकीय घराचा ताबा मिळण्यास विलंब',
+      },
+    ],
+    requiredFields: [
+      {
+        key: 'pmayApplicationNo',
+        label: {
+          en: 'PMAY Application / Registration Number',
+          hi: 'PMAY आवेदन / पंजीकरण संख्या',
+          mr: 'PMAY अर्ज / नोंदणी क्रमांक',
+        },
+        placeholder: {
+          en: 'e.g. PMAY-MH-2024-8831',
+          hi: 'जैसे PMAY-MH-2024-8831',
+          mr: 'उदा. PMAY-MH-2024-8831',
+        },
+        required: true,
+      },
+    ],
+  },
+  {
+    id: 'agriculture_dept',
+    name: {
+      en: 'Agriculture & Farmers Welfare',
+      hi: 'कृषि और किसान कल्याण',
+      mr: 'कृषी आणि शेतकरी कल्याण',
+    },
+    iconName: 'Sprout',
+    commonIssues: [
+      {
+        en: 'PM-KISAN installment not credited despite active KYC',
+        hi: 'सक्रिय केवाईसी के बावजूद पीएम-किसान किस्त जमा नहीं हुई',
+        mr: 'केवायसी पूर्ण असूनही पीएम-किसानचा हप्ता खात्यात जमा झाला नाही',
+      },
+      {
+        en: 'Crop insurance claim (PMFBY) compensation delayed after survey',
+        hi: 'सर्वेक्षण के बाद फसल बीमा दावा (PMFBY) मुआवजा लंबित है',
+        mr: 'पंचनामा होऊनही पीक विमा (PMFBY) भरपाई प्रलंबित',
+      },
+      {
+        en: 'Non-availability of subsidized certified seeds or fertilizer',
+        hi: 'सब्सिडी वाले प्रमाणित बीज या उर्वरक की अनुपलब्धता',
+        mr: 'अनुदानित खते किंवा बियाणे उपलब्ध नसणे',
+      },
+    ],
+    requiredFields: [
+      {
+        key: 'farmerAadhaarOrId',
+        label: {
+          en: 'Farmer Registration ID / Aadhaar Last 4 Digits',
+          hi: 'किसान पंजीकरण आईडी / आधार के अंतिम 4 अंक',
+          mr: 'शेतकरी नोंदणी आयडी / आधार शेवटचे ४ अंक',
+        },
+        placeholder: {
+          en: 'e.g. MH-AGRI-8821 or 4432',
+          hi: 'जैसे MH-AGRI-8821 या 4432',
+          mr: 'उदा. MH-AGRI-8821 किंवा ४४३२',
+        },
+        required: true,
+      },
+    ],
+  },
 ];
+

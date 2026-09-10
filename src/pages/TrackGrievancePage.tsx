@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -7,17 +7,14 @@ import {
   CheckCircle2,
   Phone,
   UserCheck,
-  Building2,
-  FileText,
   Star,
   ShieldAlert,
   ArrowRight,
-  HelpCircle,
   AlertCircle,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
 
 export const TrackGrievancePage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -25,8 +22,11 @@ export const TrackGrievancePage: React.FC = () => {
   const { t, language } = useLanguage();
   const { grievances, getGrievanceById, submitFeedback } = useGrievance();
 
-  const [inputGrievanceId, setInputGrievanceId] = useState<string>('');
-  const [selectedGrievanceId, setSelectedGrievanceId] = useState<string>('JS-2025-88392');
+  const paramId = searchParams.get('id');
+  const defaultId = paramId || (grievances.length > 0 ? grievances[0].id : 'JS-2025-88392');
+
+  const [inputGrievanceId, setInputGrievanceId] = useState<string>(defaultId);
+  const [activeGrievanceId, setActiveGrievanceId] = useState<string>(defaultId);
 
   // Feedback form state
   const [solvedOption, setSolvedOption] = useState<'YES' | 'PARTIAL' | 'NO'>('YES');
@@ -34,25 +34,15 @@ export const TrackGrievancePage: React.FC = () => {
   const [feedbackComment, setFeedbackComment] = useState<string>('');
   const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
 
-  useEffect(() => {
-    const paramId = searchParams.get('id');
-    if (paramId) {
-      setSelectedGrievanceId(paramId);
-      setInputGrievanceId(paramId);
-    } else if (grievances.length > 0) {
-      setSelectedGrievanceId(grievances[0].id);
-      setInputGrievanceId(grievances[0].id);
-    }
-  }, [searchParams, grievances]);
-
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputGrievanceId.trim()) {
-      setSelectedGrievanceId(inputGrievanceId.trim());
+      setActiveGrievanceId(inputGrievanceId.trim());
+      setFeedbackSuccess(false);
     }
   };
 
-  const currentGrievance = getGrievanceById(selectedGrievanceId);
+  const currentGrievance = getGrievanceById(activeGrievanceId);
 
   const handleFeedbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,12 +98,12 @@ export const TrackGrievancePage: React.FC = () => {
             <button
               key={g.id}
               onClick={() => {
-                setSelectedGrievanceId(g.id);
+                setActiveGrievanceId(g.id);
                 setInputGrievanceId(g.id);
                 setFeedbackSuccess(false);
               }}
               className={`px-2 py-0.5 rounded font-mono font-bold cursor-pointer transition-colors ${
-                selectedGrievanceId === g.id
+                activeGrievanceId === g.id
                   ? 'bg-[#0B2545] text-amber-300'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
@@ -128,7 +118,7 @@ export const TrackGrievancePage: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-lg p-8 text-center space-y-3">
           <AlertCircle className="w-10 h-10 text-amber-600 mx-auto" />
           <h3 className="text-base font-bold text-slate-900">
-            No grievance found with ID "{selectedGrievanceId}"
+            No grievance found with ID "{activeGrievanceId}"
           </h3>
           <p className="text-xs text-slate-600 max-w-md mx-auto">
             Please verify the ID on your receipt or SMS confirmation. You can also view all your complaints under "My Grievances".

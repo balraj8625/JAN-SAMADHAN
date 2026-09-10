@@ -13,9 +13,9 @@ import {
   Home,
   LogOut,
 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
-import { Language, TextSize } from '../types';
+import { useLanguage } from '../context/useLanguage';
+import { useAuth } from '../context/useAuth';
+import type { Language } from '../types';
 
 export const Header: React.FC = () => {
   const { language, setLanguage, textSize, setTextSize, t } = useLanguage();

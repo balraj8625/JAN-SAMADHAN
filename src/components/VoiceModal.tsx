@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, Square, Check, X, Volume2 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { Mic, Check, X, Volume2 } from 'lucide-react';
+import { useLanguage } from '../context/useLanguage';
 
 interface VoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onTranscriptComplete: (text: string) => void;
 }
+
+const sampleTranscripts = {
+  en: [
+    'Drinking water pipeline has broken in Ward 14 near the school and clean water is leaking on the road for last 4 days.',
+    'Ration shop dealer is charging 50 rupees extra for wheat and rice and refusing to give official printed receipt.',
+    'Old age pension for my mother has not been credited in bank account for last 3 months.',
+    'Dangerous deep pothole on MG Road near civil hospital main gate causing accidents.',
+  ],
+  hi: [
+    'वार्ड 14 में स्कूल के पास पीने के पानी का पाइप टूट गया है और पिछले 4 दिनों से सड़क पर साफ पानी बह रहा है।',
+    'राशन डीलर गेहूं और चावल के लिए 50 रुपये अतिरिक्त वसूल रहा है और आधिकारिक रसीद देने से मना कर रहा है।',
+    'मेरी माताजी की वृद्धावस्था पेंशन पिछले 3 महीनों से बैंक खाते में जमा नहीं हुई है।',
+    'सिविल अस्पताल के मुख्य गेट के पास सड़क पर बहुत गहरा गड्ढा है जिससे दुर्घटना की आशंका है।',
+  ],
+  mr: [
+    'प्रभाग १४ मधील शाळेजवळ पिण्याच्या पाण्याचा पाईप फुटला आहे आणि गेल्या ४ दिवसांपासून रस्त्यावर पाणी वाहत आहे.',
+    'रेशन दुकानदार धान्यासाठी ५० रुपये जास्त मागत आहे आणि अधिकृत पावती देण्यास नकार देत आहे.',
+    'माझ्या आईचे श्रावणबाळ निवृत्तीवेतन गेल्या ३ महिन्यांपासून बँकेत जमा झालेले नाही.',
+    'शासकीय रुग्णालयाजवळ रस्त्यावर मोठा धोकादायक खड्डा पडला आहे.',
+  ],
+};
 
 export const VoiceModal: React.FC<VoiceModalProps> = ({
   isOpen,
@@ -17,32 +38,12 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({
   const [isListening, setIsListening] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string>('');
 
-  const sampleTranscripts = {
-    en: [
-      'Drinking water pipeline has broken in Ward 14 near the school and clean water is leaking on the road for last 4 days.',
-      'Ration shop dealer is charging 50 rupees extra for wheat and rice and refusing to give official printed receipt.',
-      'Old age pension for my mother has not been credited in bank account for last 3 months.',
-      'Dangerous deep pothole on MG Road near civil hospital main gate causing accidents.',
-    ],
-    hi: [
-      'वार्ड 14 में स्कूल के पास पीने के पानी का पाइप टूट गया है और पिछले 4 दिनों से सड़क पर साफ पानी बह रहा है।',
-      'राशन डीलर गेहूं और चावल के लिए 50 रुपये अतिरिक्त वसूल रहा है और आधिकारिक रसीद देने से मना कर रहा है।',
-      'मेरी माताजी की वृद्धावस्था पेंशन पिछले 3 महीनों से बैंक खाते में जमा नहीं हुई है।',
-      'सिविल अस्पताल के मुख्य गेट के पास सड़क पर बहुत गहरा गड्ढा है जिससे दुर्घटना की आशंका है।',
-    ],
-    mr: [
-      'प्रभाग १४ मधील शाळेजवळ पिण्याच्या पाण्याचा पाईप फुटला आहे आणि गेल्या ४ दिवसांपासून रस्त्यावर पाणी वाहत आहे.',
-      'रेशन दुकानदार धान्यासाठी ५० रुपये जास्त मागत आहे आणि अधिकृत पावती देण्यास नकार देत आहे.',
-      'माझ्या आईचे श्रावणबाळ निवृत्तीवेतन गेल्या ३ महिन्यांपासून बँकेत जमा झालेले नाही.',
-      'शासकीय रुग्णालयाजवळ रस्त्यावर मोठा धोकादायक खड्डा पडला आहे.',
-    ],
-  };
-
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+
+    const timeoutId = setTimeout(() => {
       setIsListening(true);
       setTranscript('');
-      // Simulate live typing effect
       const phrases = sampleTranscripts[language] || sampleTranscripts['en'];
       const chosen = phrases[0];
 
@@ -57,8 +58,17 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({
         }
       }, 100);
 
-      return () => clearInterval(interval);
-    }
+      cleanupRef = () => {
+        clearInterval(interval);
+      };
+    }, 0);
+
+    let cleanupRef: (() => void) | undefined;
+
+    return () => {
+      clearTimeout(timeoutId);
+      cleanupRef?.();
+    };
   }, [isOpen, language]);
 
   if (!isOpen) return null;

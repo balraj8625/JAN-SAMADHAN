@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Phone, ShieldCheck, X, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
+import { ShieldCheck, X, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../context/useAuth';
+import { useLanguage } from '../context/useLanguage';
 
 export const LoginModal: React.FC = () => {
   const { isLoginModalOpen, closeLoginModal, loginWithMobile } = useAuth();

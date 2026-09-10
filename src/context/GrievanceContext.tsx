@@ -1,33 +1,8 @@
-import React, { createContext, useContext, useState } from 'react';
-import { Grievance, Priority, Attachment } from '../types';
+import React, { useState } from 'react';
+import { Grievance, Priority } from '../types';
 import { initialMockGrievances } from '../data/mockGrievances';
 import { mockDepartments } from '../data/mockDepartments';
-
-export interface DraftGrievance {
-  description: string;
-  location: {
-    state: string;
-    district: string;
-    blockOrWard: string;
-    landmark: string;
-    pincode: string;
-  };
-  attachments: Attachment[];
-  departmentId: string;
-  departmentName: {
-    en: string;
-    hi: string;
-    mr: string;
-  };
-  category: {
-    en: string;
-    hi: string;
-    mr: string;
-  };
-  urgency: Priority;
-  aiSummary: string;
-  specificDetails: Record<string, string>;
-}
+import { DraftGrievance, GrievanceContext } from './grievanceContextDef';
 
 const initialDraft: DraftGrievance = {
   description: '',
@@ -39,11 +14,11 @@ const initialDraft: DraftGrievance = {
     pincode: '411005',
   },
   attachments: [],
-  departmentId: 'water-supply',
+  departmentId: 'water_supply_dept',
   departmentName: {
     en: 'Department of Water Supply & Sanitation',
     hi: 'जल आपूर्ति एवं स्वच्छता विभाग',
-    mr: 'पानी पुरवठा व स्वच्छता विभाग',
+    mr: 'पाणी पुरवठा व स्वच्छता विभाग',
   },
   category: {
     en: 'Water Supply Interruption / Pipeline Defect',
@@ -54,20 +29,6 @@ const initialDraft: DraftGrievance = {
   aiSummary: '',
   specificDetails: {},
 };
-
-interface GrievanceContextType {
-  grievances: Grievance[];
-  draft: DraftGrievance;
-  setDraft: React.Dispatch<React.SetStateAction<DraftGrievance>>;
-  resetDraft: () => void;
-  analyzeProblemAI: (text: string) => void;
-  submitGrievance: () => Grievance;
-  getGrievanceById: (id: string) => Grievance | undefined;
-  submitFeedback: (id: string, feedback: NonNullable<Grievance['feedback']>) => void;
-  submitAppeal: (id: string, reason: string, remarks: string) => void;
-}
-
-const GrievanceContext = createContext<GrievanceContextType | undefined>(undefined);
 
 export const GrievanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [grievances, setGrievances] = useState<Grievance[]>(initialMockGrievances);
@@ -80,39 +41,75 @@ export const GrievanceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Smart AI simulation to map text keywords to departments
   const analyzeProblemAI = (text: string) => {
     const lower = text.toLowerCase();
-    let selectedDeptId = 'water-supply';
+    let selectedDeptId = 'water_supply_dept';
     let urgency: Priority = 'MEDIUM';
     let catEn = 'Public Infrastructure & Maintenance';
     let catHi = 'सार्वजनिक बुनियादी ढांचा और रखरखाव';
     let catMr = 'सार्वजनिक पायाभूत सुविधा व देखभाल';
 
-    if (lower.includes('ration') || lower.includes('rice') || lower.includes('wheat') || lower.includes('dealer') || lower.includes('shop') || lower.includes('राशन') || lower.includes('रेशन')) {
-      selectedDeptId = 'ration-pds';
+    if (lower.includes('scholarship') || lower.includes('student') || lower.includes('admission') || lower.includes('school') || lower.includes('college') || lower.includes('छात्रवृत्ति') || lower.includes('शिष्यवृत्ती')) {
+      selectedDeptId = 'education_dept';
+      urgency = 'HIGH';
+      catEn = 'Scholarship Disbursement & Academic Issues';
+      catHi = 'छात्रवृत्ति वितरण और शैक्षणिक मुद्दे';
+      catMr = 'शिष्यवृत्ती वितरण आणि शैक्षणिक समस्या';
+    } else if (lower.includes('ration') || lower.includes('rice') || lower.includes('wheat') || lower.includes('dealer') || lower.includes('shop') || lower.includes('राशन') || lower.includes('रेशन')) {
+      selectedDeptId = 'food_supply_dept';
       urgency = 'HIGH';
       catEn = 'Fair Price Shop Malpractice & Overcharging';
       catHi = 'राशन दुकान गड़बड़ी एवं अत्यधिक शुल्क';
       catMr = 'रेशन दुकानातील गैरप्रकार व जादा दर';
-    } else if (lower.includes('road') || lower.includes('pothole') || lower.includes('street light') || lower.includes('drain') || lower.includes('सड़क') || lower.includes('गड्ढा') || lower.includes('रस्ता') || lower.includes('खड्डा')) {
-      selectedDeptId = 'roads-pwd';
+    } else if (lower.includes('road') || lower.includes('pothole') || lower.includes('street light') || lower.includes('bridge') || lower.includes('सड़क') || lower.includes('गड्ढा') || lower.includes('रस्ता') || lower.includes('खड्डा')) {
+      selectedDeptId = 'roads_dept';
       urgency = lower.includes('accident') || lower.includes('danger') ? 'HIGH' : 'MEDIUM';
       catEn = 'Road Damage & Safety Concern';
       catHi = 'सड़क क्षति और सुरक्षा चिंता';
       catMr = 'रस्त्याची हानी आणि सुरक्षिततेचा प्रश्न';
-    } else if (lower.includes('pension') || lower.includes('widow') || lower.includes('old age') || lower.includes('allowance') || lower.includes('पेंशन') || lower.includes('पेन्शन')) {
-      selectedDeptId = 'pension-social-welfare';
+    } else if (lower.includes('pension') || lower.includes('pf') || lower.includes('epfo') || lower.includes('uan') || lower.includes('provident') || lower.includes('widow') || lower.includes('old age') || lower.includes('allowance') || lower.includes('पेंशन') || lower.includes('पेन्शन')) {
+      selectedDeptId = 'epfo_dept';
       urgency = 'HIGH';
-      catEn = 'Pension Disbursement & Scheme Benefits';
-      catHi = 'पेंशन वितरण और योजना लाभ';
-      catMr = 'निवृत्तीवेतन वितरण आणि योजना लाभ';
+      catEn = 'EPF Withdrawal & Pension Disbursement';
+      catHi = 'ईपीएफ निकासी और पेंशन वितरण';
+      catMr = 'ईपीएफ रक्कम आणि निवृत्तीवेतन वितरण';
     } else if (lower.includes('power') || lower.includes('light') || lower.includes('electric') || lower.includes('meter') || lower.includes('voltage') || lower.includes('बिजली') || lower.includes('वीज')) {
-      selectedDeptId = 'electricity-discom';
+      selectedDeptId = 'electricity_dept';
       urgency = lower.includes('spark') || lower.includes('wire') ? 'URGENT' : 'MEDIUM';
       catEn = 'Electricity Supply & Meter Discrepancy';
       catHi = 'बिजली आपूर्ति और मीटर विसंगति';
       catMr = 'वीज पुरवठा आणि मीटर विसंगती';
+    } else if (lower.includes('railway') || lower.includes('train') || lower.includes('ticket') || lower.includes('pnr') || lower.includes('रेलवे') || lower.includes('रेल्वे')) {
+      selectedDeptId = 'railways_dept';
+      urgency = 'MEDIUM';
+      catEn = 'Railway Passenger Service & Ticket Refund';
+      catHi = 'रेलवे यात्री सेवा एवं टिकट रिफंड';
+      catMr = 'रेल्वे प्रवासी सेवा आणि तिकीट परतावा';
+    } else if (lower.includes('garbage') || lower.includes('drain') || lower.includes('waste') || lower.includes('sewage') || lower.includes('stray') || lower.includes('कचरा') || lower.includes('नाला')) {
+      selectedDeptId = 'municipal_dept';
+      urgency = 'MEDIUM';
+      catEn = 'Municipal Sanitation & Civic Amenities';
+      catHi = 'नगरपालिका स्वच्छता और नागरिक सुविधाएं';
+      catMr = 'नगरपालिका स्वच्छता आणि नागरी सुविधा';
+    } else if (lower.includes('hospital') || lower.includes('health') || lower.includes('doctor') || lower.includes('medicine') || lower.includes('phc') || lower.includes('अस्पताल') || lower.includes('रुग्णालय') || lower.includes('औषध')) {
+      selectedDeptId = 'health_dept';
+      urgency = 'HIGH';
+      catEn = 'Healthcare Service & Medicine Availability';
+      catHi = 'स्वास्थ्य सेवा और दवा उपलब्धता';
+      catMr = 'आरोग्य सेवा आणि औषध उपलब्धता';
+    } else if (lower.includes('housing') || lower.includes('pmay') || lower.includes('आवास') || lower.includes('घरकुल')) {
+      selectedDeptId = 'housing_dept';
+      urgency = 'MEDIUM';
+      catEn = 'Housing Scheme Subsidy & Allotment';
+      catHi = 'आवास योजना सब्सिडी और आवंटन';
+      catMr = 'गृहनिर्माण योजना अनुदान आणि वाटप';
+    } else if (lower.includes('kisan') || lower.includes('farmer') || lower.includes('crop') || lower.includes('fertilizer') || lower.includes('कृषि') || lower.includes('शेतकरी')) {
+      selectedDeptId = 'agriculture_dept';
+      urgency = 'HIGH';
+      catEn = 'Agriculture Support & PM-KISAN Scheme';
+      catHi = 'कृषि सहायता और पीएम-किसान योजना';
+      catMr = 'कृषी सहाय्य आणि पीएम-किसान योजना';
     } else {
       // Default to water if pipe/water/leak
-      selectedDeptId = 'water-supply';
+      selectedDeptId = 'water_supply_dept';
       urgency = 'HIGH';
       catEn = 'Water Supply Interruption / Pipeline Defect';
       catHi = 'जल आपूर्ति में बाधा / पाइपलाइन दोष';
@@ -310,10 +307,3 @@ export const GrievanceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   );
 };
 
-export const useGrievance = () => {
-  const context = useContext(GrievanceContext);
-  if (!context) {
-    throw new Error('useGrievance must be used within a GrievanceProvider');
-  }
-  return context;
-};

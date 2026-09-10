@@ -7,11 +7,11 @@ export const initialMockGrievances: Grievance[] = [
     targetDate: '2025-03-11',
     title: 'Drinking water pipeline broken near Primary School Ward 14',
     description: 'The main drinking water pipe is leaking continuously near the primary school in Ward 14. Water is accumulating on the street and drinking water supply pressure is extremely low in nearby 40 houses for last 4 days.',
-    departmentId: 'water-supply',
+    departmentId: 'water_supply_dept',
     departmentName: {
       en: 'Department of Water Supply & Sanitation',
       hi: 'जल आपूर्ति एवं स्वच्छता विभाग',
-      mr: 'पानी पुरवठा व स्वच्छता विभाग',
+      mr: 'पाणी पुरवठा व स्वच्छता विभाग',
     },
     category: {
       en: 'Pipeline Leakage & Low Pressure',
@@ -133,11 +133,11 @@ export const initialMockGrievances: Grievance[] = [
     targetDate: '2025-02-18',
     title: 'Fair Price Shop owner charging ₹60 extra per ration kit and denying receipt',
     description: 'FPS Ration Shop No. 42 owner Shri Suresh Patil is demanding ₹60 extra over MRP for government subsidized wheat and rice. When asked for receipt, he refuses and threatens to cancel ration card.',
-    departmentId: 'ration-pds',
+    departmentId: 'food_supply_dept',
     departmentName: {
-      en: 'Department of Food, Civil Supplies & Consumer Affairs',
-      hi: 'खाद्य, नागरिक आपूर्ति एवं उपभोक्ता मामले विभाग',
-      mr: 'अन्न, नागरी पुरवठा व ग्राहक संरक्षण विभाग',
+      en: 'Food, Civil Supplies & Consumer Protection',
+      hi: 'खाद्य, नागरिक आपूर्ति और उपभोक्ता संरक्षण',
+      mr: 'अन्न, नागरी पुरवठा आणि ग्राहक संरक्षण',
     },
     category: {
       en: 'Fair Price Shop Malpractice & Overcharging',
@@ -232,11 +232,11 @@ export const initialMockGrievances: Grievance[] = [
     targetDate: '2025-01-31',
     title: 'Dangerous deep pothole on MG Road near Government Hospital',
     description: 'A massive 3-foot wide pothole developed after rains near the government hospital main gate. Multiple two-wheelers slipped at night.',
-    departmentId: 'roads-pwd',
+    departmentId: 'roads_dept',
     departmentName: {
-      en: 'Public Works Department (PWD) & Municipal Roads',
-      hi: 'लोक निर्माण विभाग (PWD) एवं नगर मार्ग',
-      mr: 'सार्वजनिक बांधकाम विभाग (PWD) व रस्ते',
+      en: 'Roads & Transport',
+      hi: 'सड़क और परिवहन',
+      mr: 'रस्ते आणि वाहतूक',
     },
     category: {
       en: 'Road Maintenance & Pothole Repair',
@@ -325,11 +325,11 @@ export const initialMockGrievances: Grievance[] = [
     targetDate: '2025-01-26',
     title: 'Indira Gandhi Old Age Pension payment delayed for 3 consecutive months',
     description: 'Mother (Smt. Laxmibai, age 72) has not received her monthly old age pension amount of ₹1,500 for November, December, and January. Bank account details are updated.',
-    departmentId: 'pension-social-welfare',
+    departmentId: 'epfo_dept',
     departmentName: {
-      en: 'Department of Social Justice & Pension Services',
-      hi: 'सामाजिक न्याय एवं पेंशन कल्याण विभाग',
-      mr: 'सामाजिक न्याय व निवृत्तीवेतन विभाग',
+      en: 'EPFO (Employees Provident Fund)',
+      hi: 'ईपीएफओ (कर्मचारी भविष्य निधि)',
+      mr: 'ईपीएफओ (कर्मचारी भविष्य निधी)',
     },
     category: {
       en: 'Pension Disbursement Delay',

@@ -1,14 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { User } from '../types';
-
-interface AuthContextType {
-  user: User | null;
-  isLoginModalOpen: boolean;
-  openLoginModal: () => void;
-  closeLoginModal: () => void;
-  loginWithMobile: (mobile: string, name?: string) => void;
-  logout: () => void;
-}
+import { AuthContext } from './authContextDef';
 
 const defaultUser: User = {
   id: 'usr-9820',
@@ -17,8 +9,6 @@ const defaultUser: User = {
   district: 'Pune',
   isLoggedIn: true, // Default logged in for smooth prototype experience
 };
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(defaultUser);
@@ -56,12 +46,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

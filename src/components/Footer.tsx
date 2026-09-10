@@ -1,9 +1,7 @@
 import React from 'react';
-import { ShieldCheck, PhoneCall, HeartHandshake, Lock } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { ShieldCheck, PhoneCall, Lock } from 'lucide-react';
 
 export const Footer: React.FC = () => {
-  const { t } = useLanguage();
 
   return (
     <footer className="w-full bg-[#0B2545] text-white border-t-4 border-amber-600 mt-12">

@@ -11,15 +11,14 @@ import {
   HelpCircle,
   X,
   ArrowRight,
-  ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
 import { VoiceModal } from '../components/VoiceModal';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
 import { mockDepartments } from '../data/mockDepartments';
-import { Attachment, Priority } from '../types';
+import type { Attachment } from '../types';
 
 export const LodgeGrievancePage: React.FC = () => {
   const { t, language } = useLanguage();

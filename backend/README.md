@@ -1,310 +1,156 @@
 # JAN-SAMADHAN Backend API
 
-Backend REST API for the JAN-SAMADHAN citizen grievance portal. This is a hackathon prototype using mock/simulated government workflow data.
-
-## 📋 Requirements
-
-- **Node.js** v18+ 
-- **PostgreSQL** v14+
-- **npm** or **yarn**
-
-## 🚀 Installation
-
-### 1. Clone and Navigate
-
-```bash
-cd backend
-```
-
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Environment Setup
-
-Copy the example environment file and update the values:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration:
-
-```env
-DATABASE_URL="postgresql://username:password@localhost:5432/jan_samadhan?schema=public"
-JWT_SECRET="your-super-secret-jwt-key-change-in-production"
-JWT_EXPIRY="7d"
-PORT=3001
-NODE_ENV="development"
-FRONTEND_URL="http://localhost:5173"
-MAX_FILE_SIZE_MB=5
-UPLOAD_DIR="./uploads"
-DEMO_AUTH_ENABLED=false
-```
-
-### 4. PostgreSQL Setup
-
-Create a PostgreSQL database:
-
-```sql
-CREATE DATABASE jan_samadhan;
-```
-
-Or use an existing PostgreSQL instance and update the `DATABASE_URL` in `.env`.
-
-### 5. Prisma Setup
-
-Generate Prisma Client:
-
-```bash
-npm run prisma:generate
-```
-
-Run database migrations:
-
-```bash
-npm run prisma:deploy
-```
-
-Seed the database with demo data:
-
-```bash
-npm run prisma:seed
-```
-
-## 🏃 Development
-
-Start the development server with hot reload:
-
-```bash
-npm run dev
-```
-
-The API will be available at `http://localhost:3001`
-
-## 📦 Build & Production
-
-Build TypeScript to JavaScript:
-
-```bash
-npm run build
-```
-
-Start production server:
-
-```bash
-npm run start
-```
-
-## 📡 API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/auth/register` | Register new user | No |
-| POST | `/api/auth/login` | Login user | No |
-| POST | `/api/auth/verify-otp` | Verify OTP (mocked) | No |
-| GET | `/api/auth/me` | Get current user | Yes |
-
-### Departments
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/api/departments` | List all departments | No |
-| GET | `/api/departments/:id` | Get department by ID | No |
-
-### Grievances
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/grievances` | Create new grievance | Yes |
-| GET | `/api/grievances` | List user's grievances | Yes |
-| GET | `/api/grievances/:id` | Get grievance details | Yes |
-| GET | `/api/grievances/:id/timeline` | Get timeline events | Yes |
-| POST | `/api/grievances/:id/feedback` | Submit feedback | Yes |
-| POST | `/api/grievances/:id/appeal` | Submit appeal | Yes |
-| GET | `/api/grievances/:id/appeal` | Get appeal status | Yes |
-| GET | `/api/grievances/:id/escalation-check` | Check escalation recommendation | Yes |
-
-### Attachments
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/grievances/:id/attachments` | Upload attachment | Yes |
-| GET | `/api/grievances/:id/attachments` | Get attachments | Yes |
-
-### AI (Placeholder Endpoints)
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/ai/analyze` | Analyze grievance text | No |
-| POST | `/api/ai/generate-grievance` | Generate grievance draft | No |
-| POST | `/api/ai/explain-response` | Explain government response | No |
-
-## 🧪 Example Requests
-
-### Register User
-
-```bash
-curl -X POST http://localhost:3001/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "John Doe",
-    "mobile": "9876543210",
-    "email": "john@example.com",
-    "preferredLanguage": "en"
-  }'
-```
-
-### Login
-
-```bash
-curl -X POST http://localhost:3001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mobile": "9876543210",
-    "password": "demo123"
-  }'
-```
-
-### Get Departments
-
-```bash
-curl http://localhost:3001/api/departments
-```
-
-### Create Grievance
-
-```bash
-curl -X POST http://localhost:3001/api/grievances \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "title": "Street light not working",
-    "description": "The street light in front of my house has not been working for 10 days.",
-    "departmentId": "municipal_dept",
-    "category": "Infrastructure",
-    "state": "Maharashtra",
-    "district": "Mumbai"
-  }'
-```
-
-### Get User Grievances
-
-```bash
-curl http://localhost:3001/api/grievances \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### Analyze Text (AI)
-
-```bash
-curl -X POST http://localhost:3001/api/ai/analyze \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "My scholarship has not been credited for three months"
-  }'
-```
-
-## 🗄️ Database Schema
-
-The application uses the following main entities:
-
-- **User**: Citizen accounts
-- **Department**: Government departments (Education, EPFO, Railways, etc.)
-- **Grievance**: Citizen grievances with SLA tracking
-- **GrievanceEvent**: Timeline events for grievances
-- **Attachment**: File attachments for grievances
-- **Feedback**: Citizen feedback on resolved grievances
-- **Appeal**: Appeals for unresolved grievances
-
-## 🔐 Security Features
-
-- JWT-based authentication
-- Password hashing with bcrypt
-- Request validation with Zod
-- Rate limiting (100 requests per 15 minutes)
-- CORS protection
-- Ownership checks on grievances
-- No plain-text passwords stored
-
-## 📊 SLA Tracking
-
-- 21-day resolution timeline
-- Automatic `dueAt` calculation
-- `isOverdue` flag when past deadline
-- Escalation recommendations for overdue cases
-
-## 🌐 Multi-language Support
-
-All departments and grievance events support:
-- English (en)
-- Hindi (hi)
-- Marathi (mr)
-
-## ⚠️ Important Notes
-
-This is a **hackathon prototype**:
-
-- ❌ Does NOT connect to real CPGRAMS or government systems
-- ❌ OTP verification is a development-only demo mechanism. It is disabled unless `DEMO_AUTH_ENABLED=true` and never enables in production.
-- ❌ AI endpoints return deterministic mock results
-- ❌ Demo users are seeded with password `demo123`
-- ✅ JWT sessions require a valid password, except when the explicit development-only demo OTP mode is enabled.
-- ✅ Demonstrates complete citizen grievance workflow
-
-## 🛠️ Scripts Reference
-
-```bash
-npm run dev           # Start development server
-npm run build         # Build TypeScript
-npm run start         # Start production server
-npm run prisma:generate   # Generate Prisma client
-npm run prisma:migrate    # Run database migrations
-npm run prisma:seed       # Seed demo data
-npm run prisma:studio     # Open Prisma Studio GUI
-```
-
-## 📁 Project Structure
-
-```
-backend/
-├── src/
-│   ├── config/          # Database & environment config
-│   ├── controllers/     # Request handlers (thin layer)
-│   ├── middleware/      # Auth & validation middleware
-│   ├── routes/          # API route definitions
-│   ├── services/        # Business logic
-│   │   ├── aiService.ts
-│   │   ├── authService.ts
-│   │   ├── departmentService.ts
-│   │   ├── grievanceService.ts
-│   │   └── slaService.ts
-│   ├── utils/           # Utilities & validators
-│   ├── app.ts           # Express app setup
-│   └── server.ts        # Server entry point
-├── prisma/
-│   ├── schema.prisma    # Database schema
-│   └── seed.ts          # Seed script
-├── uploads/             # File uploads directory
-├── .env.example         # Environment template
-├── package.json
-├── tsconfig.json
-└── README.md
-```
-
-## 🔗 Frontend Integration
-
-To connect the existing React/Vite frontend:
-
-1. Update frontend API base URL to `http://localhost:3001/api`
-2. Store JWT token from login response
-3. Include `Authorization: Bearer <token>` header in authenticated requests
-4. Handle API responses with `{ success: boolean, data: any, message?: string }` format
+The backend for **JAN-SAMADHAN** is an Express.js and TypeScript REST API powered by Prisma ORM and PostgreSQL. It manages user authentication, role-based access control, departmental grievance lifecycles, SLA monitoring, AI-assisted content drafting, and file attachment handling.
 
 ---
 
-**JAN-SAMADHAN** - जन समाधान - People's Solution
+## 🏛️ Architecture & System Modules
+
+```text
+backend/
+├── prisma/
+│   ├── schema.prisma          # Prisma schema with relational models, enums & indexes
+│   ├── seed.ts                # Database seed script for official accounts & departments
+│   └── migrations/            # Migration history
+├── scripts/
+│   └── test-e2e.ts            # Automated End-to-End integration test suite
+├── src/
+│   ├── config/
+│   │   ├── env.ts             # Environment variable parsing and validation
+│   │   └── database.ts        # Prisma client singleton instance
+│   ├── controllers/
+│   │   ├── authController.ts       # Register, login, me, verify OTP
+│   │   ├── grievanceController.ts  # CRUD, tracking, feedback, appeals
+│   │   ├── departmentController.ts # Department listing
+│   │   ├── aiController.ts         # AI text analysis, draft generation, response explainer
+│   │   └── attachmentController.ts # File upload & safe download
+│   ├── middleware/
+│   │   ├── auth.ts            # JWT authentication & role-based authorization (RBAC)
+│   │   └── upload.ts          # Multer storage configuration with MIME whitelist
+│   ├── routes/
+│   │   ├── auth.ts            # /api/auth
+│   │   ├── grievances.ts      # /api/grievances
+│   │   ├── departments.ts     # /api/departments
+│   │   ├── ai.ts              # /api/ai
+│   │   └── attachments.ts     # /api/grievances/:id/attachments
+│   ├── services/
+│   │   ├── slaService.ts      # 21-day SLA calculations & escalation checks
+│   │   └── aiService.ts       # AI draft generation & text analysis heuristics
+│   ├── utils/
+│   │   └── validators.ts      # Zod validation schemas for all incoming payloads
+│   ├── app.ts                 # Express application setup, CORS, rate limiting, health check
+│   └── server.ts              # Server startup and graceful termination hooks
+├── uploads/                   # Local filesystem storage for uploaded files
+└── package.json
+```
+
+---
+
+## ⚙️ Environment Variables
+
+Create `backend/.env` with the following parameters:
+
+```env
+PORT=5000
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/jan_samadhan?schema=public"
+JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
+JWT_EXPIRY="7d"
+FRONTEND_URL="http://localhost:5173"
+DEMO_AUTH_ENABLED=true
+MAX_FILE_SIZE_MB=5
+UPLOAD_DIR="./uploads"
+```
+
+| Variable | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `PORT` | number | `5000` | HTTP port for the Express server |
+| `DATABASE_URL` | string | *required* | PostgreSQL connection string with schema |
+| `JWT_SECRET` | string | *required* | Secret key for signing and verifying JWT tokens |
+| `JWT_EXPIRY` | string | `7d` | Expiration time for JWT tokens |
+| `FRONTEND_URL` | string | `http://localhost:5173` | Allowed CORS origin for web client |
+| `DEMO_AUTH_ENABLED` | boolean | `false` | Enables simulated OTP auth (disabled automatically if `NODE_ENV=production`) |
+| `MAX_FILE_SIZE_MB` | number | `5` | Maximum upload file size in megabytes |
+| `UPLOAD_DIR` | string | `./uploads` | Directory for storing file attachments |
+
+---
+
+## 🚀 Available Backend Scripts
+
+All commands are run from the `backend/` directory:
+
+```bash
+# Clean install of backend dependencies (and automatic Prisma client generation)
+npm ci
+
+# Start development server with live reload
+npm run dev
+
+# Compile TypeScript and generate Prisma client
+npm run build
+
+# Start production server
+npm run start
+
+# Generate Prisma client manually
+npm run prisma:generate
+
+# Apply database migrations in development
+npm run prisma:migrate
+
+# Apply database migrations in staging/production
+npm run prisma:deploy
+
+# Seed initial departments and official accounts
+npm run prisma:seed
+
+# Launch Prisma Studio GUI
+npm run prisma:studio
+
+# Validate Prisma schema
+npm run prisma:validate
+```
+
+---
+
+## 📡 API Endpoint Overview
+
+### Health & Readiness
+- `GET /health`: Probes database connectivity (`SELECT 1`) and reports service status.
+
+### Authentication (`/api/auth`)
+- `POST /api/auth/register`: Register new citizen account (Name, Mobile, Password, Language).
+- `POST /api/auth/login`: Authenticate with Mobile & Password (or simulated OTP in dev).
+- `POST /api/auth/verify-otp`: Verify mobile OTP and issue JWT.
+- `GET /api/auth/me`: Retrieve current authenticated user profile.
+
+### Departments (`/api/departments`)
+- `GET /api/departments`: Returns all active government departments.
+
+### Grievances (`/api/grievances`)
+- `POST /api/grievances`: Submit new grievance (Citizen only).
+- `GET /api/grievances`: List grievances for authenticated citizen or departmental official.
+- `GET /api/grievances/track/:grievanceNumber`: Public tracking endpoint by grievance number.
+- `GET /api/grievances/:id`: Get full grievance detail with timeline and SLA.
+- `POST /api/grievances/:id/feedback`: Submit rating (1-5) and feedback on resolved cases.
+- `POST /api/grievances/:id/appeal`: Submit formal escalation appeal.
+- `GET /api/grievances/:id/escalation-check`: Query SLA status and escalation recommendation.
+- `POST /api/grievances/:id/attachments`: Upload attachment (PDF, JPEG, PNG, WEBP).
+- `GET /api/grievances/:id/attachments/:attachmentId/download`: Safely stream attachment file.
+
+### AI Redressal Assistance (`/api/ai`)
+- `POST /api/ai/analyze`: Analyzes text for urgency, keywords, and department suggestions.
+- `POST /api/ai/generate-grievance`: Generates structured grievance text from keywords.
+- `POST /api/ai/explain-response`: Simplifies bureaucratic resolution text into citizen-friendly summaries.
+
+---
+
+## 🔒 Security, Authorization & Storage
+
+1. **Ownership Guards (IDOR Protection)**:
+   All citizen endpoints enforce strict user filtering (`where: { id, userId: req.user.id }`). Citizens cannot access other citizens' grievances.
+2. **Path Traversal Protection**:
+   Attachment downloads verify that resolved filepaths strictly reside within the configured `UPLOAD_DIR`.
+3. **Database Concurrency**:
+   Appeals and status transitions run in atomic `prisma.$transaction` blocks to ensure data consistency.
+4. **Storage Architecture**:
+   Local filesystem storage is configured by default. For multi-container production environments, attachments should be stored on a persistent volume mount or backed by an S3-compatible storage service.

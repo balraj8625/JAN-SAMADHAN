@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   FilePlus,
   Search,
-  CheckCircle2,
   Clock,
-  ShieldAlert,
   ArrowRight,
   Mic,
   Droplet,
@@ -14,8 +12,8 @@ import {
   HeartHandshake,
   Zap,
 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
 
 export const HomePage: React.FC = () => {
   const { t, language } = useLanguage();
@@ -33,8 +31,8 @@ export const HomePage: React.FC = () => {
     }
   };
 
-  const handlePickSample = (problemText: string) => {
-    analyzeProblemAI(problemText);
+  const handlePickSample = async (problemText: string) => {
+    await analyzeProblemAI(problemText);
     setDraft((prev) => ({
       ...prev,
       description: problemText,

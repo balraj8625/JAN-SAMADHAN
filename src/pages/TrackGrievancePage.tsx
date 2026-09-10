@@ -7,63 +7,112 @@ import {
   CheckCircle2,
   Phone,
   UserCheck,
-  Building2,
-  FileText,
   Star,
   ShieldAlert,
   ArrowRight,
-  HelpCircle,
   AlertCircle,
+  Download,
+  FileText,
+  Loader2,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
+import { useAuth } from '../context/useAuth';
+import type { Grievance } from '../types';
 
 export const TrackGrievancePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { grievances, getGrievanceById, submitFeedback } = useGrievance();
+  const { user } = useAuth();
+  const {
+    grievances,
+    getGrievanceById,
+    fetchGrievanceByRefOrId,
+    submitFeedback,
+    downloadAttachment,
+  } = useGrievance();
 
-  const [inputGrievanceId, setInputGrievanceId] = useState<string>('');
-  const [selectedGrievanceId, setSelectedGrievanceId] = useState<string>('JS-2025-88392');
+  const paramId = searchParams.get('id');
+  const initialId = paramId || (grievances.length > 0 ? grievances[0].id : '');
+
+  const [inputGrievanceId, setInputGrievanceId] = useState<string>(initialId);
+  const [activeGrievanceId, setActiveGrievanceId] = useState<string>(initialId);
+  const [fetchedGrievance, setFetchedGrievance] = useState<Grievance | null>(null);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   // Feedback form state
   const [solvedOption, setSolvedOption] = useState<'YES' | 'PARTIAL' | 'NO'>('YES');
   const [rating, setRating] = useState<number>(5);
   const [feedbackComment, setFeedbackComment] = useState<string>('');
   const [feedbackSuccess, setFeedbackSuccess] = useState<boolean>(false);
+  const [feedbackError, setFeedbackError] = useState<string>('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState<boolean>(false);
+  const [downloadingAttId, setDownloadingAttId] = useState<string | null>(null);
 
+  // Attempt to resolve grievance from local state or backend
   useEffect(() => {
-    const paramId = searchParams.get('id');
-    if (paramId) {
-      setSelectedGrievanceId(paramId);
-      setInputGrievanceId(paramId);
-    } else if (grievances.length > 0) {
-      setSelectedGrievanceId(grievances[0].id);
-      setInputGrievanceId(grievances[0].id);
-    }
-  }, [searchParams, grievances]);
+    if (!activeGrievanceId.trim()) return;
+
+    let isMounted = true;
+    void fetchGrievanceByRefOrId(activeGrievanceId)
+      .then((remote) => {
+        if (isMounted) setFetchedGrievance(remote);
+      })
+      .catch(() => {
+        if (isMounted) setFetchedGrievance(null);
+      })
+      .finally(() => {
+        if (isMounted) setIsSearching(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeGrievanceId, fetchGrievanceByRefOrId]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputGrievanceId.trim()) {
-      setSelectedGrievanceId(inputGrievanceId.trim());
+      setActiveGrievanceId(inputGrievanceId.trim());
+      setFeedbackSuccess(false);
+      setFeedbackError('');
     }
   };
 
-  const currentGrievance = getGrievanceById(selectedGrievanceId);
+  const currentGrievance = getGrievanceById(activeGrievanceId) || fetchedGrievance;
 
-  const handleFeedbackSubmit = (e: React.FormEvent) => {
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentGrievance) {
-      submitFeedback(currentGrievance.id, {
-        solved: solvedOption,
-        rating,
-        comment: feedbackComment,
-        submittedAt: new Date().toISOString().split('T')[0],
-      });
+    if (!currentGrievance) return;
+
+    setIsSubmittingFeedback(true);
+    setFeedbackError('');
+    try {
+      await submitFeedback(currentGrievance.id, rating, feedbackComment);
       setFeedbackSuccess(true);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Failed to submit feedback. Note: feedback is only available once a grievance is resolved or closed.';
+      setFeedbackError(msg);
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
+  const handleDownloadAttachment = async (attachmentId: string, fileName: string) => {
+    if (!currentGrievance) return;
+    setDownloadingAttId(attachmentId);
+    try {
+      await downloadAttachment(currentGrievance.id, attachmentId, fileName);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to download attachment';
+      alert(msg);
+    } finally {
+      setDownloadingAttId(null);
     }
   };
 
@@ -76,7 +125,7 @@ export const TrackGrievancePage: React.FC = () => {
           {t('trackingTitle')}
         </h1>
         <p className="text-xs font-semibold text-slate-600">
-          Enter your 12-digit Grievance Reference ID to see real-time status and nodal officer contact.
+          Enter your Grievance Reference ID (e.g. GRV2026123456) to see real-time status and nodal officer contact.
         </p>
       </div>
 
@@ -89,56 +138,70 @@ export const TrackGrievancePage: React.FC = () => {
               type="text"
               value={inputGrievanceId}
               onChange={(e) => setInputGrievanceId(e.target.value)}
-              placeholder="e.g. JS-2025-88392"
+              placeholder="e.g. GRV2026123456 or JS-2025-88392"
               className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-md text-sm font-bold text-slate-900 font-mono uppercase focus:ring-2 focus:ring-amber-500 focus:outline-hidden"
             />
           </div>
           <button
             type="submit"
-            className="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-sm rounded-md shadow-xs transition-colors cursor-pointer"
+            disabled={isSearching}
+            className="px-6 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white font-extrabold text-sm rounded-md shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
           >
-            {t('btnTrackNow')}
+            {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            <span>{t('btnTrackNow')}</span>
           </button>
         </form>
 
-        {/* Quick chip buttons for existing mock IDs */}
-        <div className="mt-3 flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-          <span className="text-slate-500 font-semibold">Try sample IDs:</span>
-          {grievances.slice(0, 4).map((g) => (
-            <button
-              key={g.id}
-              onClick={() => {
-                setSelectedGrievanceId(g.id);
-                setInputGrievanceId(g.id);
-                setFeedbackSuccess(false);
-              }}
-              className={`px-2 py-0.5 rounded font-mono font-bold cursor-pointer transition-colors ${
-                selectedGrievanceId === g.id
-                  ? 'bg-[#0B2545] text-amber-300'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              {g.id}
-            </button>
-          ))}
-        </div>
+        {/* Quick chip buttons for existing user grievances */}
+        {grievances.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+            <span className="text-slate-500 font-semibold">Your Grievances:</span>
+            {grievances.slice(0, 4).map((g) => (
+              <button
+                key={g.id}
+                onClick={() => {
+                  setActiveGrievanceId(g.id);
+                  setInputGrievanceId(g.id);
+                  setFeedbackSuccess(false);
+                  setFeedbackError('');
+                }}
+                className={`px-2 py-0.5 rounded font-mono font-bold cursor-pointer transition-colors ${
+                  activeGrievanceId.toLowerCase() === g.id.toLowerCase()
+                    ? 'bg-[#0B2545] text-amber-300'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {g.id}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {!currentGrievance ? (
+      {isSearching ? (
+        <div className="bg-white border border-slate-200 rounded-lg p-12 text-center space-y-3">
+          <Loader2 className="w-8 h-8 text-amber-600 animate-spin mx-auto" />
+          <p className="text-xs font-semibold text-slate-600">
+            Fetching grievance details from central database...
+          </p>
+        </div>
+      ) : !currentGrievance ? (
         <div className="bg-white border border-slate-200 rounded-lg p-8 text-center space-y-3">
           <AlertCircle className="w-10 h-10 text-amber-600 mx-auto" />
           <h3 className="text-base font-bold text-slate-900">
-            No grievance found with ID "{selectedGrievanceId}"
+            {activeGrievanceId ? `No grievance found with ID "${activeGrievanceId}"` : 'Enter a Grievance Reference ID above'}
           </h3>
           <p className="text-xs text-slate-600 max-w-md mx-auto">
             Please verify the ID on your receipt or SMS confirmation. You can also view all your complaints under "My Grievances".
           </p>
-          <button
-            onClick={() => navigate('/my-grievances')}
-            className="px-4 py-2 bg-[#0B2545] text-white text-xs font-bold rounded-md cursor-pointer"
-          >
-            Go to My Grievances
-          </button>
+          {user && (
+            <button
+              onClick={() => navigate('/my-grievances')}
+              className="px-4 py-2 bg-[#0B2545] text-white text-xs font-bold rounded-md cursor-pointer"
+            >
+              Go to My Grievances
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-6">
@@ -207,11 +270,10 @@ export const TrackGrievancePage: React.FC = () => {
 
                 <div>
                   <span className="font-bold text-slate-500 block mb-0.5">
-                    Location / Ward:
+                    Location:
                   </span>
                   <p className="font-bold text-slate-900">
-                    {currentGrievance.location.district},{' '}
-                    {currentGrievance.location.blockOrWard}
+                    {currentGrievance.location.district}, {currentGrievance.location.state}
                   </p>
                 </div>
 
@@ -224,6 +286,41 @@ export const TrackGrievancePage: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Attachments list if any */}
+              {currentGrievance.attachments && currentGrievance.attachments.length > 0 && (
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-md space-y-2">
+                  <span className="font-bold text-slate-700 block uppercase tracking-wider text-[11px]">
+                    Attached Documents ({currentGrievance.attachments.length})
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {currentGrievance.attachments.map((att) => (
+                      <div
+                        key={att.id}
+                        className="flex items-center justify-between p-2 bg-white border border-slate-200 rounded text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate pr-2">
+                          <FileText className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                          <span className="font-semibold text-slate-800 truncate">{att.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadAttachment(att.id, att.name)}
+                          disabled={downloadingAttId === att.id}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-800 cursor-pointer flex-shrink-0"
+                        >
+                          {downloadingAttId === att.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Download className="w-3.5 h-3.5" />
+                          )}
+                          <span>Download</span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Nodal Officer Contact Box */}
               <div className="p-4 bg-amber-50 border border-amber-300 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -267,21 +364,10 @@ export const TrackGrievancePage: React.FC = () => {
                     {t('overdueBadge')}
                   </h3>
                   <p className="text-xs font-semibold text-red-900">
-                    The standard 21-day timeline has elapsed. The department has issued a formal reason notice below.
+                    The standard 21-day timeline has elapsed. You can escalate directly to the District First Appellate Authority.
                   </p>
                 </div>
               </div>
-
-              {currentGrievance.delayReason && (
-                <div className="p-4 bg-white border border-red-300 rounded-md text-xs space-y-1">
-                  <span className="font-extrabold text-red-900 block uppercase tracking-wider">
-                    {t('overdueReasonHeader')}
-                  </span>
-                  <p className="text-slate-800 font-medium leading-relaxed italic">
-                    "{currentGrievance.delayReason[language] || currentGrievance.delayReason['en']}"
-                  </p>
-                </div>
-              )}
 
               <div className="pt-2 flex justify-end">
                 <button
@@ -355,12 +441,6 @@ export const TrackGrievancePage: React.FC = () => {
                       </div>
 
                       <p className="text-slate-700 leading-relaxed">{descText}</p>
-
-                      {step.officerNote && (
-                        <p className="text-[11px] font-semibold text-amber-900 bg-amber-100/60 p-2 rounded mt-2 border border-amber-200">
-                          <strong>Official Note:</strong> {step.officerNote}
-                        </p>
-                      )}
                     </div>
                   </div>
                 );
@@ -368,7 +448,7 @@ export const TrackGrievancePage: React.FC = () => {
             </div>
           </div>
 
-          {/* FEEDBACK WIDGET: Was your problem actually solved? */}
+          {/* FEEDBACK WIDGET */}
           <div className="bg-white border border-slate-200 rounded-lg p-6 space-y-4 shadow-2xs">
             <h3 className="text-base font-extrabold text-[#0B2545] font-serif flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-amber-600" />
@@ -380,13 +460,18 @@ export const TrackGrievancePage: React.FC = () => {
                 <p>✓ {t('feedbackSuccessMsg')}</p>
                 {currentGrievance.feedback && (
                   <p className="text-slate-700 font-normal italic mt-1">
-                    Recorded Rating: {currentGrievance.feedback.rating} Stars (
-                    {currentGrievance.feedback.solved})
+                    Recorded Rating: {currentGrievance.feedback.rating} Stars
                   </p>
                 )}
               </div>
             ) : (
               <form onSubmit={handleFeedbackSubmit} className="space-y-4 text-xs">
+                {feedbackError && (
+                  <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-md">
+                    {feedbackError}
+                  </div>
+                )}
+
                 {/* 3 Main Options */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <button
@@ -478,9 +563,11 @@ export const TrackGrievancePage: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="ml-auto px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-md shadow-xs transition-colors cursor-pointer"
+                    disabled={isSubmittingFeedback}
+                    className="ml-auto px-5 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white font-extrabold rounded-md shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
                   >
-                    {t('btnSubmitFeedback')}
+                    {isSubmittingFeedback ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                    <span>{t('btnSubmitFeedback')}</span>
                   </button>
                 </div>
               </form>

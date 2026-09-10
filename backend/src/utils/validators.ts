@@ -3,7 +3,7 @@ const mobile = z.string().regex(/^[6-9]\d{9}$/, 'Invalid mobile number');
 export const registerSchema = z.object({ name: z.string().trim().min(2), mobile, email: z.string().email().optional().or(z.literal('')), preferredLanguage: z.enum(['en', 'hi', 'mr']).optional(), password: z.string().min(6) });
 export const loginSchema = z.object({ mobile, password: z.string().min(6).optional(), otp: z.string().regex(/^\d{4,6}$/).optional() }).refine(data => Boolean(data.password || data.otp), { message: 'Password or OTP is required' });
 export const verifyOTPSchema = z.object({ mobile, otp: z.string().regex(/^\d{4,6}$/) });
-export const createGrievanceSchema = z.object({ title: z.string().trim().min(5), description: z.string().trim().min(20), departmentId: z.string().trim().regex(/^[a-z][a-z0-9_\-]*_dept$/, 'Invalid department ID'), category: z.string().trim().min(2), state: z.string().trim().min(2), district: z.string().trim().min(2) });
+export const createGrievanceSchema = z.object({ title: z.string().trim().min(5), description: z.string().trim().min(20), departmentId: z.string().trim().regex(/^[a-z][a-z0-9_-]*_dept$/, 'Invalid department ID'), category: z.string().trim().min(2), state: z.string().trim().min(2), district: z.string().trim().min(2) });
 export const feedbackSchema = z.object({ rating: z.number().int().min(1).max(5), comment: z.string().trim().max(500).optional() });
 export const appealSchema = z.object({ reason: z.string().trim().min(10), description: z.string().trim().min(20) });
 export const aiAnalyzeSchema = z.object({ text: z.string().trim().min(10).max(5000) });

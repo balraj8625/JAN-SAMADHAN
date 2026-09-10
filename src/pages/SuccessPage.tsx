@@ -2,27 +2,42 @@ import React from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   CheckCircle2,
-  FileText,
   Search,
   MessageSquare,
   Printer,
   FilePlus,
-  ArrowRight,
   Clock,
-  ShieldCheck,
 } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
-import { useLanguage } from '../context/LanguageContext';
-import { useGrievance } from '../context/GrievanceContext';
+import { useLanguage } from '../context/useLanguage';
+import { useGrievance } from '../context/useGrievance';
+
+import type { Grievance } from '../types';
 
 export const SuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { getGrievanceById } = useGrievance();
+  const { getGrievanceById, fetchGrievanceByRefOrId } = useGrievance();
 
-  const grievanceId = searchParams.get('id') || 'JS-2025-88392';
-  const grievance = getGrievanceById(grievanceId);
+  const grievanceId = searchParams.get('id') || '';
+  const [fetchedGrievance, setFetchedGrievance] = React.useState<Grievance | null>(null);
+
+  React.useEffect(() => {
+    if (!grievanceId) return;
+    let isMounted = true;
+    void fetchGrievanceByRefOrId(grievanceId)
+      .then((g) => {
+        if (isMounted && g) setFetchedGrievance(g);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [grievanceId, fetchGrievanceByRefOrId]);
+
+  const grievance = getGrievanceById(grievanceId) || fetchedGrievance;
 
   const handlePrint = () => {
     window.print();
@@ -53,6 +68,16 @@ export const SuccessPage: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Attachment Upload Warning Notice if any failed */}
+        {searchParams.get('attachmentWarning') && (
+          <div className="p-3.5 bg-amber-50 border border-amber-300 text-amber-900 text-xs font-semibold rounded-md text-left max-w-lg mx-auto space-y-1">
+            <p className="font-bold">⚠️ Note regarding attachments:</p>
+            <p className="text-amber-800 font-normal">
+              Your grievance was successfully registered, but one or more attachments could not be uploaded ({searchParams.get('attachmentWarning')}). You can present physical copies during site inspection.
+            </p>
+          </div>
+        )}
 
         {/* SMS Notification Confirmation */}
         <div className="p-3.5 bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold rounded-md flex items-center justify-center gap-2 max-w-lg mx-auto">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { HelpCircle, ChevronDown, ChevronUp, PhoneCall, ShieldCheck, FileQuestion } from 'lucide-react';
+import { HelpCircle, ChevronDown, ChevronUp, PhoneCall, FileQuestion } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/useLanguage';
 
 export const HelpPage: React.FC = () => {
   const { t, language } = useLanguage();
